@@ -1,17 +1,11 @@
-# pages 1 page test
+# Documentation Réseau SportLudiques 2024-2025
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+## Sommaire
 
-## Commands
+1. [Configuration du Switch Coeur](switch-core.md)
+2. [Configuration du Switch de Distribution](switch-distribution.md)
+3. [Configuration des Serveurs](serveurs.md)
+4. [Accès à Distance (SSH et RDP)](ssh-rdp.md)
+5. [Installation de OneDrive sur Linux Mint](onedrive-mint.md)
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
-
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+Cette documentation détaille la mise en place et la configuration des éléments réseau pour SportLudiques.
