@@ -1,5 +1,23 @@
+# Configuration du site
 site_name: My Docs
 site_url: https://stefanotr.github.io/projetsiotours/
+
+# Thème de MkDocs
 theme:
     name: material
 
+# Configuration du dépôt pour GitHub Pages
+repo_url: https://github.com/stefanotr/projetsiotours
+repo_name: GitHub
+
+# Options supplémentaires (facultatif)
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - meta
+  - toc:
+
+# Paramètres pour la génération du site
+site_description: Documentation pour projets IoT Tours
+site_author: Stefano TR
