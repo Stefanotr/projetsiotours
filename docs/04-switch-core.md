@@ -6,8 +6,8 @@
     - Connection au switch coeur via son port console et minicom
     - config du switch (mot de passe, SSH, vlan interface) 
 
-2. **Configuration de base:**
-  
+2. 
+  [Configuration de base des switch](03-swbase.md)
 
 3. **Configuration du VLAN d'administration (VLAN 220):**
     ```plaintext
