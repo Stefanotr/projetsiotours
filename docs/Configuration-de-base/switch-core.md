@@ -137,8 +137,6 @@ ip access-list extended ALLOW_SSH_VLAN220
 
 Cette ACL assure une protection contre les accès non autorisés aux services SSH, tout en permettant une gestion sécurisée du réseau via le VLAN de management. Elle contribue à réduire les risques d'intrusion en limitant l'accès à des adresses IP de confiance.
 
-Pour afficher un titre suivi d'une liste de commandes qui peuvent être déroulées dans un fichier Markdown, tu peux utiliser une balise `<details>` pour créer une liste à dérouler. Voici comment structurer cette section avec cette fonctionnalité :
-
 ### Assignation des adresses IP et ACL sur les interfaces VLAN
 
 <details>
@@ -213,33 +211,29 @@ La route par défaut configure le commutateur pour diriger tout le trafic destin
 
 ## 6. Configuration des Ports
 
+### Schéma du SW-core
+
+![swcoredash](Images/swcoredash.png)
+
 ### Ports en mode Trunk
 ```bash
-interface GigabitEthernet0/1
+interface GigabitEthernet1/0/24
  switchport mode trunk
  no shutdown
 !
-interface GigabitEthernet0/2
+interface GigabitEthernet1/0/23
+ switchport mode trunk
+ no shutdown
+ !
+interface GigabitEthernet1/0/22
+ switchport mode trunk
+ no shutdown
+ !
+interface GigabitEthernet1/0/2
+ switchport mode trunk
+ no shutdown
+ !
+interface GigabitEthernet1/0/1
  switchport mode trunk
  no shutdown
 ```
-
-### Ports en mode Access
-```bash
-interface GigabitEthernet0/3
- switchport mode access
- switchport access vlan 221
- no shutdown
-!
-interface GigabitEthernet0/4
- switchport mode access
- switchport access vlan 222
- no shutdown
-!
-interface GigabitEthernet0/5
- switchport mode access
- switchport access vlan 223
- no shutdown
-```
-
----

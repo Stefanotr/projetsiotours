@@ -19,6 +19,6 @@ nav:
       - Accès à Distance (SSH et RDP): Prérequie/ssh-rdp.md
     - Configuration:
       - Configuration du Switch Coeur: Configuration-de-base/switch-core.md
-      - Configuration du Switch de Distribution: 03-Configuration-de-base/05-switch-distribution.md
+      - Configuration du Switch de Distribution: Configuration-de-base/switch-distribution.md
       - Configuration des Serveurs: 03-Configuration-de-base/06-serveurs.md
       - Configuration du routage temporaire: 03-Configuration-de-base/08-routagetemp.md
