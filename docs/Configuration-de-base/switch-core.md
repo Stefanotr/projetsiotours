@@ -85,12 +85,12 @@ Les avantages principaux de SSH sont :
 
 - **Confidentialité** : SSH assure que toutes les commandes exécutées et les données échangées restent privées.
 
-En résumé, SSH est essentiel pour administrer les équipements en toute sécurité, là où Telnet représente un risque de sécurité majeur en raison de l'absence de chiffrement.
-
-
 ## 4. Autres VLANs
 
 ### Création des VLANs avec leurs noms
+
+<details>
+<summary>Cliquez pour afficher la configuration des VLANs</summary>
 
 ```bash
 vlan 220
@@ -100,48 +100,98 @@ vlan 221
  name Services
 !
 vlan 222
- name Prod
+ name DMZ
 !
 vlan 223
- name Conception
+ name (à définir)
 !
 vlan 224
- name WIFI
+ name Interconnexion
+!
+vlan 225
+ name Production
+!
+vlan 226
+ name Conception
 ```
 
-#### Description des VLANs
-- **VLAN 220 - Management** : Utilisé pour la gestion des équipements réseau, assurant que l'accès à la gestion est isolé du trafic utilisateur pour des raisons de sécurité.
-  
-- **VLAN 221 - Services** : Destiné aux services de réseau essentiels, comme les serveurs d'application ou de base de données, permettant une communication efficace et sécurisée.
+</details>
 
-- **VLAN 222 - Prod** : Réservé aux environnements de production, ce VLAN gère le trafic des systèmes en production, garantissant des performances optimales.
+### Création d'une Liste d'Accès SSH
 
-- **VLAN 223 - Conception** : Utilisé pour le développement et les tests, permettant aux équipes de travailler sur des projets sans interférer avec les environnements de production.
+L'ACL (Access Control List) étendue `ALLOW_SSH_VLAN220` a pour objectif de contrôler et sécuriser les accès SSH au réseau, en limitant l'accès aux seuls utilisateurs autorisés provenant du VLAN de management. Cette configuration permet de renforcer la sécurité en restreignant les connexions SSH à des sources spécifiques.
 
-- **VLAN 224 - WIFI** : Destiné à la connectivité sans fil, ce VLAN permet aux utilisateurs mobiles de se connecter au réseau tout en maintenant une séparation des autres types de trafic.
+#### Configuration de l'ACL :
+```bash
+ip access-list extended ALLOW_SSH_VLAN220
+ 10 permit tcp 10.10.10.0 0.0.0.255 any eq 22
+ 20 deny   tcp any any eq 22
+ 30 permit ip any any
+!
+```
 
-### Assignation des adresses IP
+#### Explication :
+- **Ligne 10** : Permet les connexions TCP sur le port 22 (SSH) uniquement depuis le sous-réseau `10.10.10.0/24`, correspondant au VLAN de management (VLAN 220). Cela garantit que seuls les administrateurs réseau peuvent accéder aux équipements via SSH depuis ce VLAN sécurisé.
+- **Ligne 20** : Bloque toutes les autres connexions SSH provenant de n'importe quelle autre source, empêchant les accès non autorisés aux équipements réseau.
+- **Ligne 30** : Permet tout autre trafic IP normal, en veillant à ce que le reste du trafic réseau ne soit pas perturbé par les restrictions SSH.
+
+Cette ACL assure une protection contre les accès non autorisés aux services SSH, tout en permettant une gestion sécurisée du réseau via le VLAN de management. Elle contribue à réduire les risques d'intrusion en limitant l'accès à des adresses IP de confiance.
+
+Pour afficher un titre suivi d'une liste de commandes qui peuvent être déroulées dans un fichier Markdown, tu peux utiliser une balise `<details>` pour créer une liste à dérouler. Voici comment structurer cette section avec cette fonctionnalité :
+
+### Assignation des adresses IP et ACL sur les interfaces VLAN
+
+<details>
+<summary>Cliquez pour afficher la configuration des interfaces VLAN</summary>
+
 ```bash
 interface Vlan220
  ip address 10.10.10.10 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
  no shutdown
 !
 interface Vlan221
  ip address 172.28.131.1 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
  no shutdown
 !
 interface Vlan222
- ip address 172.28.132.1 255.255.255.0
- no shutdown
-!
-interface Vlan223
- ip address 172.28.133.1 255.255.255.0
+ ip address 192.168.37.1 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
  no shutdown
 !
 interface Vlan224
- ip address 172.28.134.1 255.255.255.0
+ ip address 10.0.0.10 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
+ no shutdown
+!
+interface Vlan225
+ ip address 172.28.135.1 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
+ no shutdown
+!
+interface Vlan226
+ ip address 172.28.136.1 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
  no shutdown
 ```
+
+</details>
+
+### Description des VLANs
+- **VLAN 220 - Management** : Ce VLAN est utilisé pour la gestion des équipements réseau. Il permet d'isoler le trafic de gestion (comme les accès SSH ou l'administration des équipements) du reste du réseau, garantissant ainsi une meilleure sécurité et stabilité.
+  
+- **VLAN 221 - Services** : Ce VLAN est dédié aux services critiques du réseau, tels que les serveurs d'applications, de bases de données ou d'authentification. Il assure une communication fiable et sécurisée entre les services essentiels.
+
+- **VLAN 222 - DMZ** : Le VLAN DMZ est utilisé pour héberger des serveurs accessibles depuis l'extérieur, tels que les serveurs web ou mail. Il offre une zone de sécurité intermédiaire entre le réseau interne et l'extérieur, protégeant le réseau principal des attaques.
+
+- **VLAN 223 - (à définir)** : Ce VLAN est encore à définir en fonction des besoins futurs ou des évolutions du réseau. Il pourrait être utilisé pour des services spécifiques ou pour des segments supplémentaires de l'infrastructure.
+
+- **VLAN 224 - Interconnexion** : Ce VLAN permet d'assurer la communication entre différents segments du réseau ou avec des réseaux tiers. Il est souvent utilisé pour connecter plusieurs sites ou infrastructures, facilitant l'échange de données tout en maintenant une séparation logique du trafic.
+
+- **VLAN 225 - Production** : Ce VLAN est réservé aux systèmes et services en environnement de production. Il est conçu pour fournir des performances optimales et une sécurité renforcée aux applications critiques de l'entreprise.
+
+- **VLAN 226 - Conception** : Utilisé par les équipes de développement et d'ingénierie, ce VLAN permet de tester de nouvelles applications ou configurations sans impacter l'environnement de production. Il garantit une séparation nette entre les activités de conception et les systèmes en cours d'utilisation.
 
 ## 5. Routage IP
 
