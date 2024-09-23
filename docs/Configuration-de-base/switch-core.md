@@ -1,142 +1,27 @@
-```markdown
-# Documentation de Configuration du Switch SW-Core-Tours
+# Configuration du Switch core
 
-## Informations Générales
-- **Nom d'hôte** : `SW-Core-Tours`
-- **Version d'IOS** : 17.6
-- **Domaine IP** : `sportludique.fr`
-- **Licence activée** : `network-essentials` avec l'add-on `dna-essentials`
-- **Mode de Redondance** : `SSO` (Stateful Switchover)
+## 1. Configuration de base (du nom d'hôte et d'un utilisateur pour le SSH)
 
----
-
-## 1. Gestion VRF (Virtual Routing and Forwarding)
-### VRF Management
+### Nom d'hôte
 ```bash
-vrf definition Mgmt-vrf
- address-family ipv4
- address-family ipv6
+hostname SW-core-tours
 ```
-- **Description** : La VRF `Mgmt-vrf` est définie pour gérer les flux IPv4 et IPv6 séparément du trafic réseau général.
 
----
-
-## 2. Sécurité
-
-### Secret d'activation
+### Configuration d'un mot de passe pour acceder au mode priviliéger
 ```bash
-enable secret 9 $9$xiT2VJ5L0eIBAk$IJC8mDKsIj3Xp7pNt4D7Uq5Hhe9LxvGtQyVKuFKAHq6
+enable secret password
 ```
-- **Description** : Le mot de passe d'activation (enable secret) est configuré avec un algorithme de chiffrement fort.
 
-### Utilisateur local
+### Création d'un utilisateur admin avec accès SSH
+
 ```bash
-username admin secret 9 $9$7e7Kh.VTlh5nlk$.Q3oi3ImEnpAsXab.6XOQECtCLFAoYtwYgpoiV6DoIc
+username admin privilege 15 secret admin
 ```
-- **Description** : L'utilisateur local `admin` est défini avec un mot de passe chiffré.
 
-### ACL SSH (VLAN220)
+### Configuration de la bannière de message du jour (MOTD)
+
 ```bash
-ip access-list extended ALLOW_SSH_VLAN220
- 10 permit tcp 10.10.10.0 0.0.0.255 any eq 22
- 20 deny   tcp any any eq 22
- 30 permit ip any any
-```
-- **Description** : Cette liste de contrôle d'accès (ACL) permet uniquement le trafic SSH (port 22) provenant du sous-réseau `10.10.10.0/24`. Tout autre trafic SSH est refusé.
-
----
-
-## 3. Interfaces VLAN
-### VLAN 220
-```bash
-interface Vlan220
- ip address 10.10.10.10 255.255.255.0
- ip access-group ALLOW_SSH_VLAN220 in
-```
-- **Description** : L'interface `Vlan220` a l'adresse IP `10.10.10.10/24` et applique l'ACL `ALLOW_SSH_VLAN220`.
-
-### VLAN 221
-```bash
-interface Vlan221
- ip address 172.28.131.1 255.255.255.0
- ip access-group ALLOW_SSH_VLAN220 in
-```
-- **Description** : L'interface `Vlan221` a l'adresse IP `172.28.131.1/24` et applique également l'ACL `ALLOW_SSH_VLAN220`.
-
-### VLAN 222 & 223 avec helper DHCP
-```bash
-interface Vlan222
- ip address 172.28.132.1 255.255.255.0
- ip helper-address 172.28.131.15
- ip access-group ALLOW_SSH_VLAN220 in
-```
-```bash
-interface Vlan223
- ip address 172.28.133.1 255.255.255.0
- ip helper-address 172.28.131.15
- ip access-group ALLOW_SSH_VLAN220 in
-```
-- **Description** : Les VLANs `222` et `223` ont des adresses IP respectives et utilisent un relais DHCP (`helper-address`) vers `172.28.131.15`.
-
-### VLAN 229
-```bash
-interface Vlan229
- ip address 10.0.0.10 255.255.255.0
- ip access-group ALLOW_SSH_VLAN220 in
-```
-- **Description** : Le VLAN `229` utilise l'adresse IP `10.0.0.10/24` avec l'ACL pour SSH.
-
----
-
-## 4. Routage IP
-### Routage activé et route par défaut
-```bash
-ip routing
-ip route 0.0.0.0 0.0.0.0 10.0.0.1
-```
-- **Description** : Le routage est activé sur le switch avec une route par défaut vers `10.0.0.1`.
-
----
-
-## 5. Services HTTP et HTTPS
-### Serveur HTTP sécurisé
-```bash
-ip http server
-ip http authentication local
-ip http secure-server
-```
-- **Description** : Les serveurs HTTP et HTTPS sont activés avec une authentification locale.
-
----
-
-## 6. Accès SSH
-### Configuration SSH
-```bash
-line vty 0 4
- login local
- transport input ssh
-```
-```bash
-line vty 5 15
- login local
- transport input ssh
-```
-- **Description** : L'accès SSH est activé et uniquement les utilisateurs locaux peuvent se connecter via SSH.
-
----
-
-## 7. Configuration Spanning Tree
-```bash
-spanning-tree mode rapid-pvst
-spanning-tree extend system-id
-```
-- **Description** : Le protocole Spanning Tree fonctionne en mode `Rapid-PVST` (Per-VLAN Spanning Tree) avec extension d'ID système.
-
----
-
-## 8. Bannière de Connexion
-```bash
-banner motd ^C
+banner motd 
 ***************************************************************************
 *                   	Welcome to SportLudiques Network               	*
 ***************************************************************************
@@ -148,72 +33,163 @@ banner motd ^C
 *   	For support, contact IT at: support@sportludiques.com         	*
 *                                                                     	*
 ***************************************************************************
-^C
 ```
-- **Description** : Une bannière d'avertissement est définie pour informer les utilisateurs que l'accès est surveillé.
+
+Voici une description expliquant l'importance d'un VLAN de management pour la sécurité, intégrée dans la documentation en Markdown :
+
+## 2. VLAN de management (VLAN 220)
+
+### Configuration du VLAN 220
+```bash
+interface Vlan220
+ ip address 10.10.10.10 255.255.255.0
+ no shutdown
+```
+
+### Pourquoi un VLAN de management ?
+
+Le VLAN de management est crucial pour isoler la gestion du réseau des autres trafics utilisateur. Voici les principales raisons de son importance :
+
+- **Sécurité accrue** : En isolant les communications de gestion du reste du réseau, il devient plus difficile pour des utilisateurs non autorisés d'accéder aux équipements réseau. Cela réduit le risque de compromission.
+  
+- **Meilleure surveillance** : Le VLAN de management permet de suivre et de contrôler plus facilement les accès aux équipements réseau, facilitant ainsi la détection des activités suspectes.
+
+- **Fiabilité et stabilité** : Le fait d’avoir un VLAN dédié à la gestion des équipements assure que les modifications, mises à jour et autres actions administratives ne sont pas perturbées par le trafic réseau standard.
+
+## 3. Domaine et SSH
+
+### Configuration du Domaine
+```bash
+ip domain-name example.com
+```
+
+### Configuration SSH
+```bash
+crypto key generate rsa modulus 2048
+ip ssh version 2
+line vty 0 4
+ login local
+ transport input ssh
+```
 
 ---
 
-## 9. Appel au support Cisco (Call-Home)
-### Service Call-Home
+### Pourquoi SSH et pas Telnet ?
+
+**SSH (Secure Shell)** est un protocole de gestion à distance sécurisé qui crypte toutes les communications entre un administrateur et un équipement réseau. Contrairement à **Telnet**, qui transmet les données (y compris les mots de passe) en texte clair, SSH garantit que toutes les informations échangées sont chiffrées et protégées des interceptions.
+
+Les avantages principaux de SSH sont :
+- **Sécurité renforcée** : SSH chiffre toutes les données, ce qui empêche les attaques de type "man-in-the-middle" ou l'espionnage des informations sensibles telles que les mots de passe.
+  
+- **Authentification** : Avec SSH, il est possible d'utiliser des clés cryptographiques pour l'authentification, ce qui renforce encore plus la sécurité.
+
+- **Confidentialité** : SSH assure que toutes les commandes exécutées et les données échangées restent privées.
+
+En résumé, SSH est essentiel pour administrer les équipements en toute sécurité, là où Telnet représente un risque de sécurité majeur en raison de l'absence de chiffrement.
+
+
+## 4. Autres VLANs
+
+### Création des VLANs avec leurs noms
+
 ```bash
-call-home
- contact-email-addr sch-smart-licensing@cisco.com
- profile "CiscoTAC-1"
-  active
-  destination transport-method http
+vlan 220
+ name Management
+!
+vlan 221
+ name Services
+!
+vlan 222
+ name Prod
+!
+vlan 223
+ name Conception
+!
+vlan 224
+ name WIFI
 ```
-- **Description** : La fonctionnalité Call-Home est activée pour envoyer des notifications au support Cisco.
 
----
+#### Description des VLANs
+- **VLAN 220 - Management** : Utilisé pour la gestion des équipements réseau, assurant que l'accès à la gestion est isolé du trafic utilisateur pour des raisons de sécurité.
+  
+- **VLAN 221 - Services** : Destiné aux services de réseau essentiels, comme les serveurs d'application ou de base de données, permettant une communication efficace et sécurisée.
 
-## 10. Classement de Paquets et Politique de Contrôle
-### Class-Maps et Policy-Map
+- **VLAN 222 - Prod** : Réservé aux environnements de production, ce VLAN gère le trafic des systèmes en production, garantissant des performances optimales.
+
+- **VLAN 223 - Conception** : Utilisé pour le développement et les tests, permettant aux équipes de travailler sur des projets sans interférer avec les environnements de production.
+
+- **VLAN 224 - WIFI** : Destiné à la connectivité sans fil, ce VLAN permet aux utilisateurs mobiles de se connecter au réseau tout en maintenant une séparation des autres types de trafic.
+
+### Assignation des adresses IP
 ```bash
-class-map match-any system-cpp-police-ios-feature
- description ICMPGEN,BROADCAST,ICMP,L2LVXCntrl,ProtoSnoop,PuntWebauth,MCASTData,Transit,DOT1XAuth,Swfwd,LOGGING,L2LVXData,ForusTraffic,ForusARP,McastEndStn,Openflow,Exception,EGRExcption,NflSampled,RpfFailed
+interface Vlan220
+ ip address 10.10.10.10 255.255.255.0
+ no shutdown
+!
+interface Vlan221
+ ip address 172.28.131.1 255.255.255.0
+ no shutdown
+!
+interface Vlan222
+ ip address 172.28.132.1 255.255.255.0
+ no shutdown
+!
+interface Vlan223
+ ip address 172.28.133.1 255.255.255.0
+ no shutdown
+!
+interface Vlan224
+ ip address 172.28.134.1 255.255.255.0
+ no shutdown
 ```
+
+## 5. Routage IP
+
+### Activation du Routage
 ```bash
-policy-map system-cpp-policy
+ip routing
 ```
-- **Description** : Une série de `class-map` est utilisée pour classifier le trafic sur le switch, et une `policy-map` (nommée `system-cpp-policy`) gère les politiques de contrôle du plan de données (Control Plane Policing - CPP).
 
----
+#### Description
+L'activation du routage IP sur un commutateur permet à celui-ci de transférer les paquets entre différents VLANs et de gérer la communication entre les réseaux. Cela est essentiel pour assurer que les données peuvent circuler efficacement à travers l'infrastructure réseau, en permettant aux appareils de différents VLANs de communiquer entre eux.
 
-## 11. Configuration des Interfaces
-### Interfaces Trunk (G1/0/1 à G1/0/24)
+### Ajout de la Route par Défaut
 ```bash
-interface GigabitEthernet1/0/1
+ip route 0.0.0.0 0.0.0.0 10.0.0.1
+```
+
+#### Description de la Route par Défaut
+La route par défaut configure le commutateur pour diriger tout le trafic destiné à un réseau non spécifié vers l'adresse IP `10.0.0.1`, qui est le routeur HSRP de Tours. Cela garantit que, même si le commutateur ne connaît pas la destination d'un paquet, il peut toujours acheminer le trafic vers le routeur principal pour traitement. Cela aide à maintenir la connectivité réseau et à éviter les pannes de communication.
+
+## 6. Configuration des Ports
+
+### Ports en mode Trunk
+```bash
+interface GigabitEthernet0/1
  switchport mode trunk
-```
-```bash
-interface GigabitEthernet1/0/23
+ no shutdown
+!
+interface GigabitEthernet0/2
  switchport mode trunk
+ no shutdown
 ```
-- **Description** : Les interfaces `GigabitEthernet1/0/1` à `GigabitEthernet1/0/24` sont configurées en mode trunk pour transporter le trafic de plusieurs VLANs.
 
----
-
-## 12. Transceivers
+### Ports en mode Access
 ```bash
-transceiver type all
- monitoring
+interface GigabitEthernet0/3
+ switchport mode access
+ switchport access vlan 221
+ no shutdown
+!
+interface GigabitEthernet0/4
+ switchport mode access
+ switchport access vlan 222
+ no shutdown
+!
+interface GigabitEthernet0/5
+ switchport mode access
+ switchport access vlan 223
+ no shutdown
 ```
-- **Description** : Les transceivers optiques sont surveillés pour tous les types de modules.
 
 ---
-
-## 13. Services de Diagnostic
-### Niveau minimal de démarrage
-```bash
-diagnostic bootup level minimal
-```
-- **Description** : Le diagnostic au démarrage est configuré sur le niveau `minimal` pour un démarrage plus rapide.
-
----
-
-## Conclusion
-Cette configuration offre une sécurité renforcée grâce à SSH et aux ACL, un contrôle rigoureux du routage et du trafic avec les `policy-maps`, et une gestion centralisée des VLANs et du spanning-tree. La configuration Call-Home assure également une surveillance proactive avec le support Cisco.
-```
-
-Cette documentation couvre toutes les commandes et configurations spécifiques que vous avez définies manuellement sur votre switch. Elle peut être facilement adaptée et complétée en fonction des besoins spécifiques de votre réseau.

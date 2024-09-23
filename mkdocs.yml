@@ -14,10 +14,11 @@ markdown_extensions:
       permalink: true
 nav:
     - Présentation: index.md
-    - Pré-requis:
+    - Dépendances:
       - Installation de OneDrive sur Linux Mint: Prérequie/onedrive-mint.md
       - Accès à Distance (SSH et RDP): Prérequie/ssh-rdp.md
     - Configuration:
       - Configuration du Switch Coeur: Configuration-de-base/switch-core.md
       - Configuration du Switch de Distribution: 03-Configuration-de-base/05-switch-distribution.md
       - Configuration des Serveurs: 03-Configuration-de-base/06-serveurs.md
+      - Configuration du routage temporaire: 03-Configuration-de-base/08-routagetemp.md
