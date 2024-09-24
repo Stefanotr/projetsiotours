@@ -97,5 +97,3 @@
     - **Commentaire** : Lance OneDrive en mode surveillance au démarrage.
 
 3. **Sauvegarder la nouvelle entrée.**
-
-[Retour au sommaire](index.md)
