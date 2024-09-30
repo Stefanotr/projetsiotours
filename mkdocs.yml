@@ -17,8 +17,11 @@ nav:
     - Dépendances:
       - Installation de OneDrive sur Linux Mint: Prérequie/onedrive-mint.md
       - Accès à Distance (SSH et RDP): Prérequie/ssh-rdp.md
-    - Configuration:
+    - Configuration des equipements:
       - Configuration du Switch Coeur: Configuration-de-base/switch-core.md
       - Configuration du Switch de Distribution: Configuration-de-base/switch-distribution.md
-      - Configuration des Serveurs: 03-Configuration-de-base/06-serveurs.md
-      - Configuration du routage temporaire: 03-Configuration-de-base/08-routagetemp.md
+      - Configuration du routeur fibre: Configuration-de-base/gatewayfi.md
+      - Configuration du routeur adsl: Configuration-de-base/gatewayad.md
+    - Haute-disponibilité:
+      - Configuration du HSRP: Haute-disponibilité/hsrp.md
+      - Configuration de IP SLA: Haute-disponibilité/rulesipsla.md
