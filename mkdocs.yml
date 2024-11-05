@@ -26,3 +26,5 @@ nav:
       - Configuration du HSRP: Haute-disponibilité/hsrp.md
       - Configuration de IP SLA: Haute-disponibilité/rulesipsla.md
       - Configuration d'une interface LACP sur cisco: Haute-disponibilité/lacp.md
+    - Cybersécurité:
+      - Configuration du HTTPS: Secu/https.md
