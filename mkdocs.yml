@@ -28,3 +28,6 @@ nav:
       - Configuration d'une interface LACP sur cisco: Haute-disponibilité/lacp.md
     - Cybersécurité:
       - Configuration du HTTPS: Secu/https.md
+    - Supérvision:
+      - Configuration du stockage pour les ISO et Modèles de Conteneurs: Supervision/storagepxiso.md
+      - Création d'un pool ZFS dans Proxmox: Supervision/zfsproxmox.md
