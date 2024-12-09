@@ -109,31 +109,3 @@ Ce guide explique comment générer et installer un certificat SSL auto-signé p
 ## 🌐 Étape 4 : Importer le certificat CA dans votre navigateur
 
 Pour que votre navigateur reconnaisse le certificat auto-signé sans avertissement de sécurité, ajoutez `myCA.pem` à vos certificats de confiance dans les paramètres de votre navigateur.
-
----
-
-<style>
-code {
-  background-color: #f4f4f4;
-  color: #333;
-  padding: 5px;
-  border-radius: 5px;
-}
-pre {
-  background-color: #272822;
-  color: #f8f8f2;
-  padding: 15px;
-  border-radius: 10px;
-}
-h1 {
-  color: #2c3e50;
-  border-bottom: 2px solid #007BFF;
-  padding-bottom: 0.3em;
-}
-h2 {
-  color: #007BFF;
-}
-h3 {
-  color: #1ABC9C;
-}
-</style>
