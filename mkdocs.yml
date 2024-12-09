@@ -3,6 +3,18 @@ site_name: Documentation Réseau SportLudiques 2024-2025
 site_url: https://stefanotr.github.io/projetsiotours/
 theme:
   name: material
+  logo: assets/images/logo.png
+  palette:
+    - scheme: default
+      primary: blue
+      accent: light-blue
+    - scheme: slate
+      primary: indigo
+      accent: pink
+  font:
+    text: "Roboto"
+    code: "Fira Code"
+
 repo_url: https://github.com/stefanotr/projetsiotours
 repo_name: GitHub
 markdown_extensions:
@@ -12,22 +24,26 @@ markdown_extensions:
   - meta
   - toc:
       permalink: true
+
 nav:
-    - Présentation: index.md
-    - Dépendances:
-      - Installation de OneDrive sur Linux Mint: Prérequie/onedrive-mint.md
-      - Accès à Distance (SSH et RDP): Prérequie/ssh-rdp.md
-    - Configuration des equipements:
-      - Configuration du Switch Coeur: Configuration-de-base/switch-core.md
-      - Configuration du Switch de Distribution: Configuration-de-base/switch-distribution.md
-      - Configuration du routeur fibre: Configuration-de-base/gatewayfi.md
-      - Configuration du routeur adsl: Configuration-de-base/gatewayad.md
-    - Haute-disponibilité:
-      - Configuration du HSRP: Haute-disponibilité/hsrp.md
-      - Configuration de IP SLA: Haute-disponibilité/rulesipsla.md
-      - Configuration d'une interface LACP sur cisco: Haute-disponibilité/lacp.md
-    - Cybersécurité:
-      - Configuration du HTTPS: Secu/https.md
-    - Supérvision:
-      - Configuration du stockage pour les ISO et Modèles de Conteneurs: Supervision/storagepxiso.md
-      - Création d'un pool ZFS dans Proxmox: Supervision/zfsproxmox.md
+  - "Présentation: index.md"
+  - "📂 Dépendances":
+      - 💻Installation de OneDrive sur Linux Mint: Prérequie/onedrive-mint.md
+      - 🖥️ Accès à Distance (SSH et RDP): Prérequie/ssh-rdp.md
+  - 🔧 Configuration des équipements:
+      - 🔌 Configuration du Switch Coeur: Configuration-de-base/switch-core.md
+      - 🖧 Configuration du Switch de Distribution: Configuration-de-base/switch-distribution.md
+      - 🌐 Configuration du routeur fibre: Configuration-de-base/gatewayfi.md
+      - 📡 Configuration du routeur adsl: Configuration-de-base/gatewayad.md
+  - "⚡ Haute-disponibilité":
+      - 🔄 Configuration du HSRP: Haute-disponibilité/hsrp.md
+      - ⚙️ Configuration de IP SLA: Haute-disponibilité/rulesipsla.md
+      - 🔗 Configuration d'une interface LACP sur Cisco: Haute-disponibilité/lacp.md
+  - 🔒 Cybersécurité:
+      - 🔐 Configuration du HTTPS: Secu/https.md
+  - 📊 Supervision:
+      - 🖥️ Installation de Proxmox sur Debian 12: Supervision/proxmox.md
+      - 💾 Configuration du stockage pour les ISO et Modèles de Conteneurs: Supervision/storagepxiso.md
+      - 🗂️ Création d'un pool ZFS dans Proxmox: Supervision/zfsproxmox.md
+
+
