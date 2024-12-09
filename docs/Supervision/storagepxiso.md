@@ -1,24 +1,3 @@
-<style>
-code {
-  background-color: #f4f4f4;
-  color: #333;
-  padding: 5px;
-  border-radius: 5px;
-}
-pre {
-  background-color: #000;
-  color: #ffffff;
-  padding: 15px;
-  margin: 15px 0;
-  border-radius: 10px;
-  font-size: 16px;
-  line-height: 1.5;
-}
-h1, h2, h3 {
-  color: #007BFF;
-}
-</style>
-
 # 🛠️ Configurer un Volume Logique pour Stocker des ISO et Modèles de Conteneurs
 
 ## 📋 Objectif

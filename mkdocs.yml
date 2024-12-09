@@ -1,9 +1,12 @@
----
 site_name: Documentation Réseau SportLudiques 2024-2025
 site_url: https://stefanotr.github.io/projetsiotours/
+repo_url: https://github.com/stefanotr/projetsiotours
+repo_name: GitHub
+
 theme:
   name: material
   logo: assets/images/logo.png
+  favicon: assets/images/favicon.ico
   palette:
     - scheme: default
       primary: blue
@@ -14,28 +17,47 @@ theme:
   font:
     text: "Roboto"
     code: "Fira Code"
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - header.autohide
+    - navigation.expand
 
-repo_url: https://github.com/stefanotr/projetsiotours
-repo_name: GitHub
+extra_css:
+  - assets/styles/custom.css
+
 markdown_extensions:
   - admonition
-  - codehilite
+  - codehilite:
+      guess_lang: false
   - footnotes
   - meta
   - toc:
       permalink: true
+  - pymdownx.emoji
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.highlight
+
+plugins:
+  - search:
+      separator: '[\s\-]+'
+  - mermaid2
+  - minify:
+      minify_html: true
 
 nav:
   - Présentation: index.md
   - 📂 Dépendances:
-      - 💻Installation de OneDrive sur Linux Mint: Prérequie/onedrive-mint.md
+      - 💻 Installation de OneDrive sur Linux Mint: Prérequie/onedrive-mint.md
       - 🖥️ Accès à Distance (SSH et RDP): Prérequie/ssh-rdp.md
   - 🔧 Configuration des équipements:
       - 🔌 Configuration du Switch Coeur: Configuration-de-base/switch-core.md
       - 🖧 Configuration du Switch de Distribution: Configuration-de-base/switch-distribution.md
       - 🌐 Configuration du routeur fibre: Configuration-de-base/gatewayfi.md
-      - 📡 Configuration du routeur adsl: Configuration-de-base/gatewayad.md
-  - "⚡ Haute-disponibilité":
+      - 📡 Configuration du routeur ADSL: Configuration-de-base/gatewayad.md
+  - ⚡ Haute-disponibilité:
       - 🔄 Configuration du HSRP: Haute-disponibilité/hsrp.md
       - ⚙️ Configuration de IP SLA: Haute-disponibilité/rulesipsla.md
       - 🔗 Configuration d'une interface LACP sur Cisco: Haute-disponibilité/lacp.md
@@ -45,5 +67,4 @@ nav:
       - 🖥️ Installation de Proxmox sur Debian 12: Supervision/proxmox.md
       - 💾 Configuration du stockage pour les ISO et Modèles de Conteneurs: Supervision/storagepxiso.md
       - 🗂️ Création d'un pool ZFS dans Proxmox: Supervision/zfsproxmox.md
-
 
