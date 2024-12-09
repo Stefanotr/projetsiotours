@@ -1,4 +1,4 @@
-name: Deploy MkDocs
+name: ci
 
 on:
   push:
@@ -20,8 +20,8 @@ jobs:
       # Configure Git pour les déploiements
       - name: Configure Git credentials
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 
       # Configure Python
       - name: Setup Python
