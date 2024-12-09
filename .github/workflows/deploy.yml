@@ -1,31 +1,47 @@
-name: ci 
+name: Deploy MkDocs
+
 on:
   push:
     branches:
-      - master 
+      - master
       - main
+
 permissions:
   contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Configure Git Credentials
+      # Vérifie le code source
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Configure Git pour les déploiements
+      - name: Configure Git credentials
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-      - uses: actions/setup-python@v5
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # Configure Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.x
-      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
-      - uses: actions/cache@v4
+          python-version: 3.12  # Utilisez une version spécifique de Python
+
+      # Ajout du cache pour améliorer les performances
+      - name: Cache dependencies
+        uses: actions/cache@v4
         with:
-          key: mkdocs-material-${{ env.cache_id }}
-          path: .cache
+          key: mkdocs-material-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+          path: ~/.cache/pip
           restore-keys: |
             mkdocs-material-
-      - run: pip install mkdocs-material 
-      - run: mkdocs gh-deploy --force
+
+      # Installe les dépendances
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      # Déploie le site sur GitHub Pages
+      - name: Deploy to GitHub Pages
+        run: mkdocs gh-deploy --force
