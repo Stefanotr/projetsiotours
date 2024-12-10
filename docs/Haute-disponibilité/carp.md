@@ -26,7 +26,7 @@ Ce guide explique comment configurer une paire de pare-feux PFsense en haute dis
 1. Accédez à `System > High Availability Sync`.
 2. Cochez **Enable State Synchronization**.
 3. Définissez :
-   - Interface : Interface dédiée configurée précédemment.
+   - Interface : Interface CARP.
    - Adresse du PFsense secondaire : `172.28.138.2`.
 4. Activez la synchronisation XMLRPC :
    - Renseignez l’adresse IP du PFsense secondaire.
