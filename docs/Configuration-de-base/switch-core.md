@@ -20,34 +20,34 @@ Un switch cœur, comme son nom l’indique, constitue le **noyau central** d’u
 
 Définissez le nom d'hôte pour identifier clairement le switch :
 
-bash
+```bash
 hostname SW-core-tours
-
+```
 
 
 ### 🔑 Mot de Passe Mode Privilégié
 
 Sécurisez l'accès au mode privilégié :
 
-bash
+```bash
 enable secret VotreMotDePasseSécurisé
-
+```
 
 
 ### 👤 Création d’un Utilisateur Administrateur
 
 Créez un utilisateur avec des privilèges élevés et un accès SSH :
 
-bash
+```bash
 username admin privilege 15 secret VotreMotDePasseAdmin
-
+```
 
 
 ### 💬 Message de Bienvenue (MOTD)
 
 Ajoutez une bannière d'avertissement pour les connexions au switch :
 
-bash
+```bash
 banner motd 
 ***************************************************************************
 *                   	Welcome to SportLudiques Network               	*
@@ -60,7 +60,7 @@ banner motd
 *   	For support, contact IT at: support@sportludiques.com         	*
 *                                                                     	*
 ***************************************************************************
-
+```
 
 
 ---
@@ -69,11 +69,11 @@ banner motd
 
 ### Configuration du VLAN de Management
 
-bash
+```bash
 interface Vlan220
  ip address 10.10.10.10 255.255.255.0
  no shutdown
-
+```
 
 
 ### 🔒 Pourquoi un VLAN de Management ?
@@ -88,20 +88,20 @@ interface Vlan220
 
 ### 🏷️ Configuration du Domaine
 
-bash
+```bash
 ip domain-name sportludique.fr
-
+```
 
 
 ### 🔐 Configuration SSH
 
-bash
+```bash
 crypto key generate rsa modulus 2048
 ip ssh version 2
 line vty 0 4
  login local
  transport input ssh
-
+```
 
 
 #### Pourquoi SSH et pas Telnet ?
@@ -160,16 +160,16 @@ vlan 226
 
 ### Activation du Routage
 
-bash
+```bash
 ip routing
-
+```
 
 
 ### Ajout de la Route par Défaut
 
-bash
+```bash
 ip route 0.0.0.0 0.0.0.0 10.0.0.1
-
+```
 
 
 #### Description
