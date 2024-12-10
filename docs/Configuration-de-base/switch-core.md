@@ -1,26 +1,53 @@
-# Configuration du Switch core
+# 🌐 Configuration Avancée du Switch Core **SW-core-tours** 🚀
 
-## 1. Configuration de base (du nom d'hôte et d'un utilisateur pour le SSH)
+## 📘 **Description d’un Switch Cœur**
 
-### Nom d'hôte
-```bash
+Un switch cœur, comme son nom l’indique, constitue le **noyau central** d’une architecture réseau. Il joue un rôle clé dans l’acheminement et l’agrégation des données entre les différents switchs de distribution, les serveurs, et les autres équipements connectés. 
+
+### 🛡️ Fonctionnalités clés :
+1. **Haute performance :** Supporte un trafic intensif avec des vitesses de transfert élevées.
+2. **Routage Inter-VLAN :** Assure la communication entre les VLANs.
+3. **Redondance et fiabilité :** Permet des configurations de haute disponibilité avec des protocoles comme HSRP ou VRRP.
+4. **Évolutivité :** Facilite l’intégration de nouveaux équipements ou extensions du réseau.
+
+### 🔄 Différence avec un switch de distribution :
+- **Switch cœur :** Optimisé pour le traitement et l'acheminement rapide du trafic global.
+- **Switch de distribution :** Connecte les périphériques utilisateurs et applique les politiques réseau (comme les ACL ou QoS).
+
+## 🛠️ **1. Configuration de Base**
+
+### 🔧 Nom d'Hôte
+
+Définissez le nom d'hôte pour identifier clairement le switch :
+
+bash
 hostname SW-core-tours
-```
 
-### Configuration d'un mot de passe pour acceder au mode priviliéger
-```bash
-enable secret password
-```
 
-### Création d'un utilisateur admin avec accès SSH
 
-```bash
-username admin privilege 15 secret admin
-```
+### 🔑 Mot de Passe Mode Privilégié
 
-### Configuration de la bannière de message du jour (MOTD)
+Sécurisez l'accès au mode privilégié :
 
-```bash
+bash
+enable secret VotreMotDePasseSécurisé
+
+
+
+### 👤 Création d’un Utilisateur Administrateur
+
+Créez un utilisateur avec des privilèges élevés et un accès SSH :
+
+bash
+username admin privilege 15 secret VotreMotDePasseAdmin
+
+
+
+### 💬 Message de Bienvenue (MOTD)
+
+Ajoutez une bannière d'avertissement pour les connexions au switch :
+
+bash
 banner motd 
 ***************************************************************************
 *                   	Welcome to SportLudiques Network               	*
@@ -33,64 +60,64 @@ banner motd
 *   	For support, contact IT at: support@sportludiques.com         	*
 *                                                                     	*
 ***************************************************************************
-```
 
-Voici une description expliquant l'importance d'un VLAN de management pour la sécurité, intégrée dans la documentation en Markdown :
 
-## 2. VLAN de management (VLAN 220)
 
-### Configuration du VLAN 220
-```bash
+---
+
+## 🌟 **2. VLAN de Management (VLAN 220)**
+
+### Configuration du VLAN de Management
+
+bash
 interface Vlan220
  ip address 10.10.10.10 255.255.255.0
  no shutdown
-```
 
-### Pourquoi un VLAN de management ?
 
-Le VLAN de management est crucial pour isoler la gestion du réseau des autres trafics utilisateur. Voici les principales raisons de son importance :
 
-- **Sécurité accrue** : En isolant les communications de gestion du reste du réseau, il devient plus difficile pour des utilisateurs non autorisés d'accéder aux équipements réseau. Cela réduit le risque de compromission.
-  
-- **Meilleure surveillance** : Le VLAN de management permet de suivre et de contrôler plus facilement les accès aux équipements réseau, facilitant ainsi la détection des activités suspectes.
+### 🔒 Pourquoi un VLAN de Management ?
 
-- **Fiabilité et stabilité** : Le fait d’avoir un VLAN dédié à la gestion des équipements assure que les modifications, mises à jour et autres actions administratives ne sont pas perturbées par le trafic réseau standard.
+- **Sécurité accrue :** Isole les communications de gestion pour limiter les accès non autorisés.
+- **Surveillance :** Simplifie la détection d'activités suspectes.
+- **Fiabilité :** Assure que les modifications administratives n’affectent pas le trafic utilisateur.
 
-## 3. Domaine et SSH
+---
 
-### Configuration du Domaine
-```bash
-ip domain-name example.com
-```
+## 🔒 **3. Domaine et Sécurité SSH**
 
-### Configuration SSH
-```bash
+### 🏷️ Configuration du Domaine
+
+bash
+ip domain-name sportludique.fr
+
+
+
+### 🔐 Configuration SSH
+
+bash
 crypto key generate rsa modulus 2048
 ip ssh version 2
 line vty 0 4
  login local
  transport input ssh
-```
+
+
+
+#### Pourquoi SSH et pas Telnet ?
+
+- **Sécurité :** Chiffrement des données pour empêcher les interceptions.
+- **Confidentialité :** Toutes les commandes et données échangées sont protégées.
+- **Authentification :** Possibilité d’utiliser des clés pour renforcer la sécurité.
 
 ---
 
-### Pourquoi SSH et pas Telnet ?
+## 🌐 **4. Autres VLANs**
 
-**SSH (Secure Shell)** est un protocole de gestion à distance sécurisé qui crypte toutes les communications entre un administrateur et un équipement réseau. Contrairement à **Telnet**, qui transmet les données (y compris les mots de passe) en texte clair, SSH garantit que toutes les informations échangées sont chiffrées et protégées des interceptions.
-
-Les avantages principaux de SSH sont :
-- **Sécurité renforcée** : SSH chiffre toutes les données, ce qui empêche les attaques de type "man-in-the-middle" ou l'espionnage des informations sensibles telles que les mots de passe.
-  
-- **Authentification** : Avec SSH, il est possible d'utiliser des clés cryptographiques pour l'authentification, ce qui renforce encore plus la sécurité.
-
-- **Confidentialité** : SSH assure que toutes les commandes exécutées et les données échangées restent privées.
-
-## 4. Autres VLANs
-
-### Création des VLANs avec leurs noms
+### 📂 Liste des VLANs
 
 <details>
-<summary>Cliquez pour afficher la configuration des VLANs</summary>
+<summary><strong>Afficher la configuration des VLANs</strong></summary>
 
 ```bash
 vlan 220
@@ -117,106 +144,48 @@ vlan 226
 
 </details>
 
-### Création d'une Liste d'Accès SSH
+### 🎯 Description des VLANs
 
-L'ACL (Access Control List) étendue `ALLOW_SSH_VLAN220` a pour objectif de contrôler et sécuriser les accès SSH au réseau, en limitant l'accès aux seuls utilisateurs autorisés provenant du VLAN de management. Cette configuration permet de renforcer la sécurité en restreignant les connexions SSH à des sources spécifiques.
+- **VLAN 220 - Management :** Administration réseau sécurisée.
+- **VLAN 221 - Services :** Applications critiques.
+- **VLAN 222 - DMZ :** Serveurs accessibles depuis l’extérieur.
+- **VLAN 223 :** À définir.
+- **VLAN 224 - Interconnexion :** Communication entre segments ou sites.
+- **VLAN 225 - Production :** Services critiques de production.
+- **VLAN 226 - Conception :** Environnement de test et développement.
 
-#### Configuration de l'ACL :
-```bash
-ip access-list extended ALLOW_SSH_VLAN220
- 10 permit tcp 10.10.10.0 0.0.0.255 any eq 22
- 20 deny   tcp any any eq 22
- 30 permit ip any any
-!
-```
+---
 
-#### Explication :
-- **Ligne 10** : Permet les connexions TCP sur le port 22 (SSH) uniquement depuis le sous-réseau `10.10.10.0/24`, correspondant au VLAN de management (VLAN 220). Cela garantit que seuls les administrateurs réseau peuvent accéder aux équipements via SSH depuis ce VLAN sécurisé.
-- **Ligne 20** : Bloque toutes les autres connexions SSH provenant de n'importe quelle autre source, empêchant les accès non autorisés aux équipements réseau.
-- **Ligne 30** : Permet tout autre trafic IP normal, en veillant à ce que le reste du trafic réseau ne soit pas perturbé par les restrictions SSH.
-
-Cette ACL assure une protection contre les accès non autorisés aux services SSH, tout en permettant une gestion sécurisée du réseau via le VLAN de management. Elle contribue à réduire les risques d'intrusion en limitant l'accès à des adresses IP de confiance.
-
-### Assignation des adresses IP et ACL sur les interfaces VLAN
-
-<details>
-<summary>Cliquez pour afficher la configuration des interfaces VLAN</summary>
-
-```bash
-interface Vlan220
- ip address 10.10.10.10 255.255.255.0
- ip access-group ALLOW_SSH_VLAN220 in
- no shutdown
-!
-interface Vlan221
- ip address 172.28.131.1 255.255.255.0
- ip access-group ALLOW_SSH_VLAN220 in
- no shutdown
-!
-interface Vlan222
- ip address 192.168.37.1 255.255.255.0
- ip access-group ALLOW_SSH_VLAN220 in
- no shutdown
-!
-interface Vlan224
- ip address 10.0.0.10 255.255.255.0
- ip access-group ALLOW_SSH_VLAN220 in
- no shutdown
-!
-interface Vlan225
- ip address 172.28.135.1 255.255.255.0
- ip access-group ALLOW_SSH_VLAN220 in
- no shutdown
-!
-interface Vlan226
- ip address 172.28.136.1 255.255.255.0
- ip access-group ALLOW_SSH_VLAN220 in
- no shutdown
-```
-
-</details>
-
-### Description des VLANs
-- **VLAN 220 - Management** : Ce VLAN est utilisé pour la gestion des équipements réseau. Il permet d'isoler le trafic de gestion (comme les accès SSH ou l'administration des équipements) du reste du réseau, garantissant ainsi une meilleure sécurité et stabilité.
-  
-- **VLAN 221 - Services** : Ce VLAN est dédié aux services critiques du réseau, tels que les serveurs d'applications, de bases de données ou d'authentification. Il assure une communication fiable et sécurisée entre les services essentiels.
-
-- **VLAN 222 - DMZ** : Le VLAN DMZ est utilisé pour héberger des serveurs accessibles depuis l'extérieur, tels que les serveurs web ou mail. Il offre une zone de sécurité intermédiaire entre le réseau interne et l'extérieur, protégeant le réseau principal des attaques.
-
-- **VLAN 223 - (à définir)** : Ce VLAN est encore à définir en fonction des besoins futurs ou des évolutions du réseau. Il pourrait être utilisé pour des services spécifiques ou pour des segments supplémentaires de l'infrastructure.
-
-- **VLAN 224 - Interconnexion** : Ce VLAN permet d'assurer la communication entre différents segments du réseau ou avec des réseaux tiers. Il est souvent utilisé pour connecter plusieurs sites ou infrastructures, facilitant l'échange de données tout en maintenant une séparation logique du trafic.
-
-- **VLAN 225 - Production** : Ce VLAN est réservé aux systèmes et services en environnement de production. Il est conçu pour fournir des performances optimales et une sécurité renforcée aux applications critiques de l'entreprise.
-
-- **VLAN 226 - Conception** : Utilisé par les équipes de développement et d'ingénierie, ce VLAN permet de tester de nouvelles applications ou configurations sans impacter l'environnement de production. Il garantit une séparation nette entre les activités de conception et les systèmes en cours d'utilisation.
-
-## 5. Routage IP
+## 🚦 **5. Routage IP**
 
 ### Activation du Routage
-```bash
-ip routing
-```
 
-#### Description
-L'activation du routage IP sur un commutateur permet à celui-ci de transférer les paquets entre différents VLANs et de gérer la communication entre les réseaux. Cela est essentiel pour assurer que les données peuvent circuler efficacement à travers l'infrastructure réseau, en permettant aux appareils de différents VLANs de communiquer entre eux.
+bash
+ip routing
+
+
 
 ### Ajout de la Route par Défaut
-```bash
+
+bash
 ip route 0.0.0.0 0.0.0.0 10.0.0.1
-```
 
-#### Description de la Route par Défaut
-La route par défaut configure le commutateur pour diriger tout le trafic destiné à un réseau non spécifié vers l'adresse IP `10.0.0.1`, qui est le routeur HSRP de Tours. Cela garantit que, même si le commutateur ne connaît pas la destination d'un paquet, il peut toujours acheminer le trafic vers le routeur principal pour traitement. Cela aide à maintenir la connectivité réseau et à éviter les pannes de communication.
 
-## 6. Configuration des Ports
 
-### Schéma du SW-core
+#### Description
 
-![swcoredash](Images/swcoredash.png)
+Le routage IP permet la communication entre les VLANs et le réseau extérieur. La route par défaut dirige le trafic inconnu vers le routeur principal (10.0.0.1).
 
-### Ports en mode Trunk
-```bash
+---
+
+## 🔄 **6. Configuration des Ports**
+
+### 🛠️ Ports en Mode Trunk
+
+<details>
+<summary><strong>Afficher la configuration des ports Trunk</strong></summary>
+
+bash
 interface GigabitEthernet1/0/24
  switchport mode trunk
  no shutdown
@@ -224,16 +193,24 @@ interface GigabitEthernet1/0/24
 interface GigabitEthernet1/0/23
  switchport mode trunk
  no shutdown
- !
+!
 interface GigabitEthernet1/0/22
  switchport mode trunk
  no shutdown
- !
+!
 interface GigabitEthernet1/0/2
  switchport mode trunk
  no shutdown
- !
+!
 interface GigabitEthernet1/0/1
  switchport mode trunk
  no shutdown
-```
+
+
+</details>
+
+---
+
+## 📚 **Conclusion**
+
+La configuration du switch **SW-core-tours** garantit une connectivité réseau robuste et fiable. En tant que switch cœur, il gère l'agrégation et le routage du trafic tout en offrant une sécurité et une performance optimales pour l'infrastructure de SportLudiques. 🌐🎉'est ca mon css pour le rendu genre quand tu afihce les vlan c'est la balise pre qu'il faut mettre.
