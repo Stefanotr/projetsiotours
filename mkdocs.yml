@@ -48,29 +48,29 @@ plugins:
       minify_html: true
 
 nav:
-  - Introduction: index.md
-  - Pré-requis:
-      - "OneDrive sous Linux Mint": Prérequie/onedrive-mint.md
-      - "Configuration LVM": Prérequie/lvmseeting.md
-      - "SSH et RDP": Prérequie/ssh-rdp.md
-  - Configuration:
-      - "Gateway AD": Configuration-de-base/gatewayad.md
-      - "Gateway FI": Configuration-de-base/gatewayfi.md
-      - "Switch Core": Configuration-de-base/switch-core.md
-      - "Switch Distribution": Configuration-de-base/switch-distribution.md
-      - "Serveurs": Configuration-de-base/serveurs.md
-  - "Réseaux avancés":
-      - "CARP": Haute-disponibilité/carp.md
-      - "HSRP": Haute-disponibilité/hsrp.md
-      - "LACP": Haute-disponibilité/lacp.md
-      - "IP SLA": Haute-disponibilité/rulesipsla.md
-  - Sécurité:
-      - "HTTPS": Secu/https.md
-  - Hypervision:
-      - "Docker": Hypervision/dockernode.md
-      - "Proxmox": Hypervision/proxmox.md
-      - "Stockage ISO": Hypervision/storagepxiso.md
-      - "ZFS sur Proxmox": Hypervision/zfsproxmox.md
-  - Ressources:
-      - "Images": assets/images/
-      - "CSS personnalisé": assets/styles/custom.css
+  - 🏠 Présentation: index.md
+  - 📂 Pré-requis:
+      - 💻 Installation de OneDrive sur Linux Mint: Prérequie/onedrive-mint.md
+      - 🖥️ Accès à Distance (SSH et RDP): Prérequie/ssh-rdp.md
+      - 💾 Configuration LVM: Prérequie/lvmseeting.md
+  - 🔧 Configuration des équipements:
+      - 🔌 Switch Coeur: Configuration-de-base/switch-core.md
+      - 🖧 Switch de Distribution: Configuration-de-base/switch-distribution.md
+      - 🌐 Routeur Fibre: Configuration-de-base/gatewayfi.md
+      - 📡 Routeur ADSL: Configuration-de-base/gatewayad.md
+      - 🖥️ Configuration des Serveurs: Configuration-de-base/serveurs.md
+  - ⚡ Réseaux avancés et haute disponibilité:
+      - 🔄 HSRP: Haute-disponibilité/hsrp.md
+      - ⚙️ IP SLA: Haute-disponibilité/rulesipsla.md
+      - 🔗 Interface LACP sur Cisco: Haute-disponibilité/lacp.md
+      - 🛡️ Configuration CARP: Haute-disponibilité/carp.md
+  - 🔒 Cybersécurité:
+      - 🔐 HTTPS: Secu/https.md
+  - 🖥️ Hypervision:
+      - 🐳 Gestion des conteneurs avec Docker: Hypervision/dockernode.md
+      - 🖥️ Installation de Proxmox sur Debian 12: Hypervision/proxmox.md
+      - 💾 Gestion du stockage ISO: Hypervision/storagepxiso.md
+      - 🗂️ Création d'un pool ZFS dans Proxmox: Hypervision/zfsproxmox.md
+  - 📚 Ressources:
+      - 🖼️ Images: assets/images/
+      - 🎨 CSS personnalisé: assets/styles/custom.css
