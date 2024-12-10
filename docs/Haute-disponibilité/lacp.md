@@ -86,23 +86,3 @@ Le **LACP** (Link Aggregation Control Protocol) permet de regrouper plusieurs li
 ## Conclusion
 
 Cette configuration de LACP permet d'améliorer la **tolérance aux pannes** et d'augmenter la **bande passante** disponible en agrégant plusieurs interfaces physiques en un seul **Port-channel**.
-
----
-
-<style>
-code {
-  background-color: #f4f4f4;
-  color: #333;
-  padding: 5px;
-  border-radius: 5px;
-}
-pre {
-  background-color: #272822;
-  color: #f8f8f2;
-  padding: 15px;
-  border-radius: 10px;
-}
-h1, h2, h3 {
-  color: #007BFF;
-}
-</style>
