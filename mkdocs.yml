@@ -64,6 +64,7 @@ nav:
       - ⚙️ IP SLA: Haute-disponibilité/rulesipsla.md
       - 🔗 Interface LACP sur Cisco: Haute-disponibilité/lacp.md
       - 🛡️ Configuration CARP: Haute-disponibilité/carp.md
+      - 🌐 Installation et Configuration d'HAProxy: Haute-disponibilité/haproxy.md
   - 🔒 Cybersécurité:
       - 🔐 HTTPS: Secu/https.md
   - 🖥️ Hypervision:
