@@ -1,4 +1,3 @@
-```markdown
 # 🌐 Installation et Configuration d'HAProxy sur Debian 🚀
 
 ## 📘 **Introduction**
