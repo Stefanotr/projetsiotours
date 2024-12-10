@@ -58,7 +58,6 @@ nav:
       - 🖧 Switch de Distribution: Configuration-de-base/switch-distribution.md
       - 🌐 Routeur Fibre: Configuration-de-base/gatewayfi.md
       - 📡 Routeur ADSL: Configuration-de-base/gatewayad.md
-      - 🖥️ Configuration des Serveurs: Configuration-de-base/serveurs.md
   - ⚡ Réseaux avancés et haute disponibilité:
       - 🔄 HSRP: Haute-disponibilité/hsrp.md
       - ⚙️ IP SLA: Haute-disponibilité/rulesipsla.md

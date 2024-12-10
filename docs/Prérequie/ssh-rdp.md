@@ -38,5 +38,3 @@
 2. **Connexion RDP au serveur Windows 10:**
     - Utilisez le client Bureau à distance intégré à Windows ou un client RDP tiers.
     - Entrez l'adresse IP du serveur Windows 10 (10.10.10.15).
-
-[Retour au sommaire](index.md)
