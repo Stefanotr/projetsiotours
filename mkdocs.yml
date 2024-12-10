@@ -48,23 +48,29 @@ plugins:
       minify_html: true
 
 nav:
-  - Présentation: index.md
-  - 📂 Dépendances:
-      - 💻 Installation de OneDrive sur Linux Mint: Prérequie/onedrive-mint.md
-      - 🖥️ Accès à Distance (SSH et RDP): Prérequie/ssh-rdp.md
-  - 🔧 Configuration des équipements:
-      - 🔌 Configuration du Switch Coeur: Configuration-de-base/switch-core.md
-      - 🖧 Configuration du Switch de Distribution: Configuration-de-base/switch-distribution.md
-      - 🌐 Configuration du routeur fibre: Configuration-de-base/gatewayfi.md
-      - 📡 Configuration du routeur ADSL: Configuration-de-base/gatewayad.md
-  - ⚡ Haute-disponibilité:
-      - 🔄 Configuration du HSRP: Haute-disponibilité/hsrp.md
-      - ⚙️ Configuration de IP SLA: Haute-disponibilité/rulesipsla.md
-      - 🔗 Configuration d'une interface LACP sur Cisco: Haute-disponibilité/lacp.md
-  - 🔒 Cybersécurité:
-      - 🔐 Configuration du HTTPS: Secu/https.md
-  - 📊 Supervision:
-      - 🖥️ Installation de Proxmox sur Debian 12: Supervision/proxmox.md
-      - 💾 Configuration du stockage pour les ISO et Modèles de Conteneurs: Supervision/storagepxiso.md
-      - 🗂️ Création d'un pool ZFS dans Proxmox: Supervision/zfsproxmox.md
-
+  - Introduction: index.md
+  - Pré-requis:
+      - "OneDrive sous Linux Mint": Prérequie/onedrive-mint.md
+      - "Configuration LVM": Prérequie/lvmseeting.md
+      - "SSH et RDP": Prérequie/ssh-rdp.md
+  - Configuration:
+      - "Gateway AD": Configuration-de-base/gatewayad.md
+      - "Gateway FI": Configuration-de-base/gatewayfi.md
+      - "Switch Core": Configuration-de-base/switch-core.md
+      - "Switch Distribution": Configuration-de-base/switch-distribution.md
+      - "Serveurs": Configuration-de-base/serveurs.md
+  - "Réseaux avancés":
+      - "CARP": Haute-disponibilité/carp.md
+      - "HSRP": Haute-disponibilité/hsrp.md
+      - "LACP": Haute-disponibilité/lacp.md
+      - "IP SLA": Haute-disponibilité/rulesipsla.md
+  - Sécurité:
+      - "HTTPS": Secu/https.md
+  - Hypervision:
+      - "Docker": Hypervision/dockernode.md
+      - "Proxmox": Hypervision/proxmox.md
+      - "Stockage ISO": Hypervision/storagepxiso.md
+      - "ZFS sur Proxmox": Hypervision/zfsproxmox.md
+  - Ressources:
+      - "Images": assets/images/
+      - "CSS personnalisé": assets/styles/custom.css
