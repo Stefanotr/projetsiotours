@@ -119,7 +119,7 @@ line vty 0 4
 <details>
 <summary><strong>Afficher la configuration des VLANs</strong></summary>
 
-```bash
+<pre>
 vlan 220
  name Management
 !
@@ -140,7 +140,7 @@ vlan 225
 !
 vlan 226
  name Conception
-```
+</pre>
 
 </details>
 
@@ -185,7 +185,7 @@ Le routage IP permet la communication entre les VLANs et le réseau extérieur. 
 <details>
 <summary><strong>Afficher la configuration des ports Trunk</strong></summary>
 
-bash
+<pre>
 interface GigabitEthernet1/0/24
  switchport mode trunk
  no shutdown
@@ -205,7 +205,7 @@ interface GigabitEthernet1/0/2
 interface GigabitEthernet1/0/1
  switchport mode trunk
  no shutdown
-
+</pre>
 
 </details>
 
