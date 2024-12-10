@@ -71,6 +71,3 @@ nav:
       - 🖥️ Installation de Proxmox sur Debian 12: Hypervision/proxmox.md
       - 💾 Gestion du stockage ISO: Hypervision/storagepxiso.md
       - 🗂️ Création d'un pool ZFS dans Proxmox: Hypervision/zfsproxmox.md
-  - 📚 Ressources:
-      - 🖼️ Images: assets/images/
-      - 🎨 CSS personnalisé: assets/styles/custom.css

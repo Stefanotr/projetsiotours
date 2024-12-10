@@ -1,12 +1,20 @@
-# Configuration du routeur TRS-GW-02-ADSL
+# 🌐 Configuration Avancée du Routeur **TRS-GW-02-ADSL** 🚀
 
-Ce guide vous aidera à configurer un routeur **TRS-GW-02-ADSL** pour une infrastructure réseau sécurisée, incluant la configuration de base, les interfaces, la sécurité SSH, le NAT, et le routage.
+Ce guide couvre la configuration complète du routeur **TRS-GW-02-ADSL**, incluant la configuration de base, la gestion des interfaces, la sécurité, le NAT, et le routage IP.
 
-## 1. Configuration de base
+---
 
-### Nom d'hôte (Hostname)
+## 📋 **Objectif**
 
-Le nom d'hôte est une étape fondamentale pour identifier le routeur dans le réseau. Utilisez la commande suivante pour configurer le nom d'hôte :
+Configurer un routeur sécurisé et fonctionnel pour répondre aux besoins d'un réseau d'entreprise.
+
+---
+
+## 🛠️ **Étape 1 : Configuration de Base**
+
+### 🔧 Nom d'hôte
+
+Définissez un nom d'hôte pour identifier le routeur dans le réseau :
 
 ```bash
 conf t
@@ -14,49 +22,48 @@ hostname TRS-GW-02-ADSL
 exit
 ```
 
-### Configuration d'un mot de passe pour accéder au mode privilégié
+### 🔑 Mot de passe Mode Privilégié
 
-Pour sécuriser l'accès au mode **enable** :
-
-```bash
-enable secret password
-```
-
-### Création d'un utilisateur admin avec accès SSH
-
-Ajoutez un utilisateur **admin** avec un privilège de niveau 15 et un accès SSH :
+Pour sécuriser l'accès au mode privilégié :
 
 ```bash
-username admin privilege 15 secret admin
+enable secret VotreMotDePasseSécurisé
 ```
 
-### Bannière (Message of the Day - MOTD)
+### 👤 Création d'un Utilisateur Administrateur
 
-Personnalisez une bannière d'accueil avec un message pour les utilisateurs qui se connectent au routeur :
+Créez un utilisateur avec des privilèges élevés pour la gestion SSH :
+
+```bash
+username admin privilege 15 secret VotreMotDePasseAdmin
+```
+
+### 💬 Message de Bienvenue (MOTD)
+
+Ajoutez une bannière personnalisée pour informer les utilisateurs connectés :
+
+<details>
+<summary><strong>Afficher le message de bannière</strong></summary>
 
 ```bash
 banner motd 
 ***************************************************************************
-*                   	Welcome to SportLudiques Network               	*
+*               Bienvenue dans le Réseau de SportLudiques 🌟              *
 ***************************************************************************
-*                                                                     	*
-*   	Authorized access only. All activities are monitored.         	*
-*                                                                     	*
-*  	"Empowering Sports and Fun with Every Connection!"             	*
-*                                                                     	*
-*   	For support, contact IT at: support@sportludiques.com         	*
-*                                                                     	*
+*                                                                         *
+*    ⚠️ Accès réservé. Toutes les activités sont surveillées.            *
+*                                                                         *
+*   ✉️ Support IT : support@sportludiques.com                             *
+*                                                                         *
 ***************************************************************************
 ```
+</details>
 
-## 2. Configuration des interfaces
+---
 
-### 2.1 Interface GigabitEthernet0/0
+## 🌐 **Étape 2 : Configuration des Interfaces**
 
-#### Interface de management (VLAN 220)
-
-<details>
-<summary style="color: #007BFF;">Cliquez pour afficher la configuration de l'interface G0/0.220 (Management)</summary>
+### 🌟 Interface VLAN Management (VLAN 220)
 
 ```bash
 conf t
@@ -66,53 +73,41 @@ interface GigabitEthernet0/0.220
  no shutdown
 exit
 ```
-</details>
 
-##### Pourquoi un VLAN de management ?
-
-Le **VLAN de management** est crucial pour isoler la gestion du réseau du trafic utilisateur. Voici les avantages :
-
-- **Sécurité accrue** : Les communications de gestion sont isolées, rendant plus difficile l'accès non autorisé.
-- **Meilleure surveillance** : Il est plus facile de surveiller et de contrôler l'accès aux équipements réseau.
-- **Fiabilité** : Assure que les actions administratives ne perturbent pas le trafic réseau standard.
-
-#### Interface d'interconnexion (VLAN 224)
-
-<details>
-<summary style="color: #007BFF;">Cliquez pour afficher la configuration de l'interface G0/0.224 (Interconnexion)</summary>
+### 🌉 Interface VLAN Interconnexion (VLAN 224)
 
 ```bash
 interface GigabitEthernet0/0.224
  encapsulation dot1Q 224
  ip address 192.168.224.3 255.255.255.0
  ip nat inside
+ no shutdown
 exit
 ```
-</details>
 
-### 2.2 Interface GigabitEthernet0/1
-
-Cette interface est utilisée pour la connectivité externe :
+### 🌍 Interface WAN
 
 ```bash
-conf t
 interface GigabitEthernet0/1
  ip address 221.87.128.2 255.255.255.252
  ip nat outside
+ no shutdown
 exit
 ```
 
-## 3. Configuration du nom de domaine et de l'accès SSH
+---
 
-### Configuration du Domaine
+## 🔒 **Étape 3 : Configuration de la Sécurité SSH**
 
-Définissez le nom de domaine pour faciliter l'accès SSH :
+### 🏷️ Nom de Domaine
+
+Définissez un nom de domaine pour activer SSH :
 
 ```bash
 ip domain-name sportludique.fr
 ```
 
-### Configuration SSH
+### 🔐 Configuration SSH
 
 ```bash
 conf t
@@ -123,56 +118,66 @@ line vty 0 4
 exit
 ```
 
-#### Pourquoi SSH et pas Telnet ?
+---
 
-**SSH** (Secure Shell) offre une communication sécurisée et chiffrée entre l'administrateur et l'équipement réseau, contrairement à **Telnet** qui transmet les informations en texte clair. Voici les principaux avantages de SSH :
+## 🔄 **Étape 4 : Configuration du NAT**
 
-- **Sécurité renforcée** : Toutes les communications sont chiffrées, empêchant les interceptions.
-- **Authentification par clé** : Possibilité d'utiliser des clés cryptographiques pour sécuriser l'accès.
-- **Confidentialité** : SSH assure que les commandes exécutées restent privées.
+<details>
+<summary><strong>📜 Configuration complète du NAT</strong></summary>
 
-## 4. Configuration du NAT et des routes statiques
-
-### 4.1 NAT (Network Address Translation)
-
-#### Qu'est-ce que le NAT ?
-
-Le **NAT** masque les adresses IP internes en les traduisant en une adresse publique, permettant aux appareils internes de communiquer avec des réseaux externes sans exposer leurs adresses privées.
-
-##### Avantages du NAT :
-- **Masquage des adresses internes** pour une sécurité accrue.
-- **Réduction de l'utilisation des adresses IP publiques** en traduisant plusieurs adresses privées en une seule adresse publique.
-- **Flexibilité du réseau** en facilitant l'intégration avec les réseaux publics.
-
-#### Configuration du NAT
+Ajoutez une liste d'accès et configurez le NAT :
 
 ```bash
 conf t
-ip nat inside source list 1 interface GigabitEthernet0/1 overload
 access-list 1 permit 172.28.128.0 0.0.31.255
 access-list 1 permit 192.168.0.0 0.0.255.255
+ip nat inside source list 1 interface GigabitEthernet0/1 overload
 exit
 ```
+</details>
 
-##### Explication des commandes :
+---
 
-- **ip nat inside source list 1 interface GigabitEthernet0/1 overload** : Active le NAT avec surcharge pour traduire plusieurs adresses internes en une adresse publique.
-- **access-list 1 permit** : Autorise les sous-réseaux à utiliser le NAT.
+## 🚦 **Étape 5 : Routage Statique**
 
-### 4.2 Routage IP
-
-Les **routes statiques** permettent au routeur de diriger le trafic en fonction de la destination.
-
-#### Configuration des Routes Statiques
+Ajoutez des routes pour le trafic réseau :
 
 ```bash
+conf t
 ip route 0.0.0.0 0.0.0.0 221.87.128.1
 ip route 172.28.128.0 255.255.224.0 192.168.224.254
 ip route 192.168.0.0 255.255.0.0 192.168.224.254
 exit
 ```
 
-##### Explication des routes :
-- **ip route 0.0.0.0 0.0.0.0 221.87.128.1** : Route par défaut pour le trafic sans destination définie.
-- **ip route 172.28.128.0 255.255.224.0** : Route spécifique pour le sous-réseau 172.28.128.0.
-- **ip route 192.168.0.0 255.255.0.0** : Route spécifique pour le sous-réseau 192.168.0.0.
+---
+
+## 🧩 **Étape 6 : Validation et Tests**
+
+### ✅ Vérification des Interfaces
+
+Affichez les interfaces configurées :
+
+```bash
+show ip interface brief
+```
+
+### 🌐 Testez la Connectivité WAN
+
+Vérifiez la connectivité externe :
+
+```bash
+ping 8.8.8.8
+```
+
+### 🔄 Vérifiez les Traductions NAT
+
+```bash
+show ip nat translations
+```
+
+---
+
+## 📚 **Conclusion**
+
+Le routeur **TRS-GW-02-ADSL** est maintenant configuré pour fournir une connectivité sécurisée, gérer le trafic interne et externe via NAT, et permettre une administration via SSH. 🌐🎉
