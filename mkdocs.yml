@@ -67,10 +67,14 @@ nav:
   - 🔒 Cybersécurité:
       - 🔐 HTTPS: Secu/https.md
   - 🖥️ Hypervision:
-      - 🐳 Gestion des conteneurs avec Docker: Hypervision/dockernode.md
-      - 🖥️ Installation de Proxmox sur Debian 12: Hypervision/proxmox.md
-      - 💾 Gestion du stockage ISO: Hypervision/storagepxiso.md
-      - 🗂️ Création d'un pool ZFS dans Proxmox: Hypervision/zfsproxmox.md
+      - 🐳 Docker:
+          - Gestion des conteneurs avec Docker: Hypervision/dockernode.md
+      - 💻 Proxmox:
+          - Introduction: Hypervision/Proxmox/intro.md
+          - Installation de Proxmox sur Debian 12: Hypervision/proxmox.md
+          - Gestion du stockage ISO: Hypervision/storagepxiso.md
+          - Création d'un pool ZFS dans Proxmox: Hypervision/zfsproxmox.md
+          - Mise en place du HTTPS sécurisé sur Proxmox: Hypervision/Proxmox/httpsprx.md
   - 📞 Téléphonie:
       - 📞 Téléphonie Asterisk: Telephonie/Telephonie.md
 
