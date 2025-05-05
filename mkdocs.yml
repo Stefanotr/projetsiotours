@@ -50,27 +50,30 @@ plugins:
 nav:
   - 🏠 Présentation: index.md
   - 🔧 Configuration des équipements:
-      - 🔌 Switch Coeur: Configuration-de-base/switch-core.md
-      - 🖧 Switch de Distribution: Configuration-de-base/switch-distribution.md
-      - 🌐 Routeur Fibre: Configuration-de-base/gatewayfi.md
-      - 📡 Routeur ADSL: Configuration-de-base/gatewayad.md
+      -  Switch Coeur: Configuration-de-base/switch-core.md
+      -  Switch de Distribution: Configuration-de-base/switch-distribution.md
+      -  Routeur Fibre: Configuration-de-base/gatewayfi.md
+      -  Routeur ADSL: Configuration-de-base/gatewayad.md
   - ⚡ Réseaux avancés et haute disponibilité:
-      - 🔄 HSRP: Haute-disponibilité/hsrp.md
-      - ⚙️ IP SLA: Haute-disponibilité/rulesipsla.md
-      - 🔗 Interface LACP sur Cisco: Haute-disponibilité/lacp.md
-      - 🛡️ Configuration CARP: Haute-disponibilité/carp.md
-      - 🌐 Installation et Configuration d'HAProxy: Haute-disponibilité/haproxy.md
+      -  HSRP: Haute-disponibilité/hsrp.md
+      -  IP SLA: Haute-disponibilité/rulesipsla.md
+      -  Interface LACP sur Cisco: Haute-disponibilité/lacp.md
+      -  Configuration CARP: Haute-disponibilité/carp.md
+      -  Installation et Configuration d'HAProxy: Haute-disponibilité/haproxy.md
   - 🔒 Cybersécurité:
-      - 🔐 HTTPS: Secu/https.md
+      -  HTTPS: Secu/https.md
   - 🖥️ Hypervision:
-      - 🐳 Docker:
+      -  Docker:
           - Gestion des conteneurs avec Docker: Hypervision/dockernode.md
-      - 💻 Proxmox:
+      -  Proxmox:
           - Introduction: Hypervision/Proxmox/intro.md
           - Installation de Proxmox sur Debian 12: Hypervision/proxmox.md
           - Gestion du stockage ISO: Hypervision/storagepxiso.md
           - Création d'un pool ZFS dans Proxmox: Hypervision/zfsproxmox.md
           - Mise en place du HTTPS sécurisé sur Proxmox: Hypervision/Proxmox/httpsprx.md
   - 📞 Téléphonie:
-      - 📞 Téléphonie Asterisk: Telephonie/Telephonie.md
+      -  Téléphonie Asterisk: Telephonie/Telephonie.md
+  - 🔗 VPN:
+      - VPN SSL: VPN/SSL.md
+      - VPN IPSec: VPN/IPSec.md
 

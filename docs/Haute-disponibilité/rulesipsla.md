@@ -1,80 +1,84 @@
-# Document sur IP SLA
+# Guide de configuration – IP SLA et suivi HSRP
 
-## Qu'est-ce que IP SLA ?
+## 1. Contexte : supervision proactive de la connectivité WAN
 
-**IP SLA** (Service Level Agreement) est une fonctionnalité des routeurs Cisco qui permet de surveiller les performances et la disponibilité des réseaux. Il utilise divers protocoles, tels que ICMP (ping), pour effectuer des tests de connectivité et d'autres vérifications de services.
+Dans l’architecture Sportludique, les routeurs **TRS‑GW‑01‑FIBRE** (actif) et **TRS‑GW‑02‑ADSL** (secours) utilisent HSRP pour fournir une passerelle virtuelle sur le VLAN 224. Pour garantir un basculement pertinent, il est indispensable d’évaluer en continu l’état réel des liaisons WAN :
 
-## Pourquoi utiliser IP SLA ?
+| Plan | Objectif | Mécanisme |
+|------|----------|-----------|
+| Couche 3 | Adresse IP virtuelle et priorité | **HSRP** |
+| Couche 3 | Santé de la route de sortie (ping passerelle FAI) | **IP SLA + Track** |
 
-L'utilisation d'IP SLA offre plusieurs avantages :
+En associant IP SLA au suivi HSRP :
 
-- **Surveillance proactive** : Permet de vérifier en continu la disponibilité des ressources réseau, comme les passerelles et les serveurs.
-- **Détection de pannes** : Identifie rapidement les problèmes de connectivité, ce qui permet une réponse rapide.
-- **Intégration avec HSRP** : IP SLA peut être intégré avec HSRP (Hot Standby Router Protocol) pour basculer automatiquement entre les routeurs en cas de défaillance.
+- le routeur **dissimule** les incidents liés à l’interface locale (up/down) ;
+- le basculement s’enclenche si la **passerelle FAI** n’est plus joignable ;
+- la priorité HSRP est **décrémentée dynamiquement** (–10) pour céder le rôle actif au routeur de secours.
 
-## Configuration d'IP SLA pour surveiller la connectivité WAN
+---
 
-### Objectif
+## 2. Procédure de configuration
 
-L'objectif ici est de configurer IP SLA pour qu'il ping une passerelle (par exemple, `183.44.37.2`) toutes les 30 secondes. Si la passerelle ne répond pas, la priorité du routeur associé sera diminuée de 10, ce qui pourrait entraîner un basculement HSRP.
-
-### Étapes de Configuration
-
-#### Sur Routeur 1 (TRS-GW-01-FIBRE)
-
-1. **Configurer IP SLA** :
-```bash
-   Router1(config)# ip sla 1
-   Router1(config-ip-sla)# icmp-echo 183.44.37.2 source-interface g0/1
-   Router1(config-ip-sla)# frequency 30
-   Router1(config-ip-sla)# exit
-   Router1(config)# ip sla schedule 1 life forever start-time now
-```
-
-2. **Configurer le suivi IP SLA** :
-```bash
-   Router1(config)# track 1 ip sla 1 reachability
-   Router1(config)# interface g0/0.224
-   Router1(config-if)# standby 1 track 1 decrement 10
-```
-
-#### Sur Routeur 2 (TRS-GW-02-ADSL)
-
-1. **Configurer IP SLA** :
-```bash
-   Router2(config)# ip sla 1
-   Router2(config-ip-sla)# icmp-echo 221.87.128.1 source-interface g0/1
-   Router2(config-ip-sla)# frequency 30
-   Router2(config-ip-sla)# exit
-   Router2(config)# ip sla schedule 1 life forever start-time now
-```
-
-2. **Configurer le suivi IP SLA** :
-```bash
-   Router2(config)# track 1 ip sla 1 reachability
-   Router2(config)# interface g0/0.224
-   Router2(config-if)# standby 1 track 1 decrement 10
-```
-
-### Explication des Commandes
-
-- **`ip sla <id>`** : Crée une instance d'IP SLA.
-- **`icmp-echo <ip> source-interface <interface>`** : Configure un test ICMP à destination d'une adresse IP à partir d'une interface spécifique.
-- **`frequency <value>`** : Définit la fréquence à laquelle le test est exécuté (en secondes).
-- **`track <track-id> ip sla <sla-id> reachability`** : Lie une instance d'IP SLA à un objet de suivi.
-- **`standby <group> track <track-id> decrement <value>`** : Diminue la priorité HSRP si le suivi échoue.
-
-## Vérification de la Configuration
-
-Pour vérifier l'état de l'IP SLA et des suivis, utilisez les commandes suivantes :
+### 2.1 Routeur principal – **TRS‑GW‑01‑FIBRE**
 
 ```bash
-    Router1# show ip sla statistics
-    Router2# show ip sla statistics
-    Router1# show track
-    Router2# show track
+! 1. Créer l’IP SLA n°1
+ip sla 1
+ icmp-echo 183.44.37.2 source-interface GigabitEthernet0/1
+ frequency 30
+exit
+!
+! 2. Planifier l’exécution en continu
+ip sla schedule 1 life forever start-time now
+!
+! 3. Associer à un objet de suivi
+track 1 ip sla 1 reachability
+!
+! 4. Lier le suivi au groupe HSRP sur le sous‑interface WAN interne
+interface GigabitEthernet0/0.224
+ standby 1 track 1 decrement 10
 ```
 
-## Conclusion
+### 2.2 Routeur de secours – **TRS‑GW‑02‑ADSL**
 
-IP SLA est un outil puissant pour surveiller la connectivité WAN. Couplé à HSRP, il permet de garantir une redondance et une continuité de service, même en cas de défaillance des interfaces WAN.
+```bash
+ip sla 1
+ icmp-echo 221.87.128.1 source-interface GigabitEthernet0/1
+ frequency 30
+exit
+ip sla schedule 1 life forever start-time now
+!
+track 1 ip sla 1 reachability
+!
+interface GigabitEthernet0/0.224
+ standby 1 track 1 decrement 10
+```
+
+> **Paramètres clés** :
+> * `frequency 30` : intervalle de 30 s entre deux tests ICMP.
+> * `decrement 10` : abaisse la priorité HSRP de 10 points si le suivi échoue.
+
+### 2.3 Validation
+
+```bash
+# Statistiques IP SLA
+show ip sla statistics
+
+# État des objets de suivi
+show track
+
+# Rôle HSRP et priorité effective
+show standby brief
+```
+
+---
+
+## 3. Conclusion
+
+La combinaison **IP SLA + Track** fournit une détection fine des coupures WAN ; elle complète HSRP pour assurer :
+
+- un **basculement rapide** vers la passerelle de secours en cas de perte de connectivité vers le FAI ;
+- un **retour automatique** au routeur fibre lorsque la liaison redevient opérationnelle ;
+- une **continuité de service** perçue par les hôtes, sans modification de leur passerelle par défaut.
+
+Cet ensemble renforce la résilience du réseau Sportludique face aux incidents de transport.

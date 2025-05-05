@@ -1,125 +1,56 @@
-# 🌐 Configuration Avancée du Switch Core **SW-core-tours** 🚀
+# Guide de configuration – Switch cœur **TRS‑SW‑CORE**
 
-## 📘 **Description d’un Switch Cœur**
+## 1. Contexte : rôle central et exigences de performance
 
-Un switch cœur, comme son nom l’indique, constitue le **noyau central** d’une architecture réseau. Il joue un rôle clé dans l’acheminement et l’agrégation des données entre les différents switchs de distribution, les serveurs, et les autres équipements connectés. 
+Le switch **TRS‑SW‑CORE** est le nœud principal de l’infrastructure Sportludique. Il agrège le trafic des switches de distribution, assure le routage inter‑VLAN et relaie les flux vers la passerelle Internet. Les objectifs clés demeurent :
 
-### 🛡️ Fonctionnalités clés :
-1. **Haute performance :** Supporte un trafic intensif avec des vitesses de transfert élevées.
-2. **Routage Inter-VLAN :** Assure la communication entre les VLANs.
-3. **Redondance et fiabilité :** Permet des configurations de haute disponibilité avec des protocoles comme HSRP ou VRRP.
-4. **Évolutivité :** Facilite l’intégration de nouveaux équipements ou extensions du réseau.
-
-### 🔄 Différence avec un switch de distribution :
-- **Switch cœur :** Optimisé pour le traitement et l'acheminement rapide du trafic global.
-- **Switch de distribution :** Connecte les périphériques utilisateurs et applique les politiques réseau (comme les ACL ou QoS).
-
-## 🛠️ **1. Configuration de Base**
-
-### 🔧 Nom d'Hôte
-
-Définissez le nom d'hôte pour identifier clairement le switch :
-
-```bash
-hostname SW-core-tours
-```
-
-
-### 🔑 Mot de Passe Mode Privilégié
-
-Sécurisez l'accès au mode privilégié :
-
-```bash
-enable secret VotreMotDePasseSécurisé
-```
-
-
-### 👤 Création d’un Utilisateur Administrateur
-
-Créez un utilisateur avec des privilèges élevés et un accès SSH :
-
-```bash
-username admin privilege 15 secret VotreMotDePasseAdmin
-```
-
-
-### 💬 Message de Bienvenue (MOTD)
-
-Ajoutez une bannière d'avertissement pour les connexions au switch :
-
-```bash
-banner motd 
-***************************************************************************
-*                   	Welcome to SportLudiques Network               	*
-***************************************************************************
-*                                                                     	*
-*   	Authorized access only. All activities are monitored.         	*
-*                                                                     	*
-*  	"Empowering Sports and Fun with Every Connection!"             	*
-*                                                                     	*
-*   	For support, contact IT at: support@sportludiques.com         	*
-*                                                                     	*
-***************************************************************************
-```
-
+- **Débit élevé** : commutation L2/L3 avec forte capacité de traitement.
+- **Routage inter‑VLAN** : distribution efficace du trafic entre segments logiques.
+- **Haute disponibilité** : liens agrégés (Port‑Channel 1) et trunks multiples.
+- **Sécurité d’administration** : gestion isolée via le VLAN 220 et SSH.
 
 ---
 
-## 🌟 **2. VLAN de Management (VLAN 220)**
+## 2. Procédure de configuration
 
-### Configuration du VLAN de Management
+### 2.1 Configuration de base
+
+```bash
+conf t
+hostname TRS-SW-CORE
+!
+! Mot de passe privilégié
+enable secret <Secret_Privileged_Mode>
+!
+! Compte d’administration
+username admin privilege 15 secret <Secret_Admin>
+!
+! Bannière légale
+banner motd ^
+***************************************************************************
+*      Accès réservé : toute activité est enregistrée et auditée.          *
+*      Support IT : support@sportludiques.com                               *
+***************************************************************************
+^
+exit
+```
+
+### 2.2 VLAN de management et SVI
 
 ```bash
 interface Vlan220
  ip address 10.10.10.10 255.255.255.0
+ ip helper-address 172.28.131.50
+ ip access-group ALLOW_SSH_VLAN220 in
  no shutdown
 ```
 
-
-### 🔒 Pourquoi un VLAN de Management ?
-
-- **Sécurité accrue :** Isole les communications de gestion pour limiter les accès non autorisés.
-- **Surveillance :** Simplifie la détection d'activités suspectes.
-- **Fiabilité :** Assure que les modifications administratives n’affectent pas le trafic utilisateur.
-
----
-
-## 🔒 **3. Domaine et Sécurité SSH**
-
-### 🏷️ Configuration du Domaine
-
-```bash
-ip domain-name sportludique.fr
-```
-
-
-### 🔐 Configuration SSH
-
-```bash
-crypto key generate rsa modulus 2048
-ip ssh version 2
-line vty 0 4
- login local
- transport input ssh
-```
-
-
-#### Pourquoi SSH et pas Telnet ?
-
-- **Sécurité :** Chiffrement des données pour empêcher les interceptions.
-- **Confidentialité :** Toutes les commandes et données échangées sont protégées.
-- **Authentification :** Possibilité d’utiliser des clés pour renforcer la sécurité.
-
----
-
-## 🌐 **4. Autres VLANs**
-
-### 📂 Liste des VLANs
-
-<details>
-<summary><strong>Afficher la configuration des VLANs</strong></summary>
+### 2.3 Définition des VLANs
 
 <pre>
+vlan 125
+ name Infra_Backup
+!
 vlan 220
  name Management
 !
@@ -130,7 +61,7 @@ vlan 222
  name DMZ
 !
 vlan 223
- name (à définir)
+ name A_Definir
 !
 vlan 224
  name Interconnexion
@@ -140,77 +71,167 @@ vlan 225
 !
 vlan 226
  name Conception
+!
+vlan 227
+ name Tests
+!
+vlan 228
+ name OT_Zone
+!
+vlan 229
+ name Transit
 </pre>
 
-</details>
+### 2.4 SVIs supplémentaires
 
-### 🎯 Description des VLANs
+```bash
+interface Vlan125
+ ip address 192.168.125.1 255.255.255.0
+!
+interface Vlan221
+ ip address 172.28.131.1 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
+!
+interface Vlan225
+ ip address 172.28.135.1 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
+!
+interface Vlan226
+ ip address 172.28.136.1 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
+!
+interface Vlan227
+ ip address 172.28.137.1 255.255.255.0
+ ip helper-address 172.28.131.50
+ ip access-group ALLOW_SSH_VLAN220 in
+!
+interface Vlan228
+ ip address 172.28.138.10 255.255.255.0
+!
+interface Vlan229
+ ip address 192.168.229.254 255.255.255.0
+ ip access-group ALLOW_SSH_VLAN220 in
+```
 
-- **VLAN 220 - Management :** Administration réseau sécurisée.
-- **VLAN 221 - Services :** Applications critiques.
-- **VLAN 222 - DMZ :** Serveurs accessibles depuis l’extérieur.
-- **VLAN 223 :** À définir.
-- **VLAN 224 - Interconnexion :** Communication entre segments ou sites.
-- **VLAN 225 - Production :** Services critiques de production.
-- **VLAN 226 - Conception :** Environnement de test et développement.
+### 2.5 Sécurisation de l’accès distant (SSH)
 
----
+```bash
+ip domain-name sportludique.fr
+crypto key generate rsa modulus 2048
+ip ssh version 2
+line vty 0 4
+ login local
+ transport input ssh
+line vty 5 15
+ login local
+ transport input ssh
+exit
+```
 
-## 🚦 **5. Routage IP**
-
-### Activation du Routage
+### 2.6 Routage IP
 
 ```bash
 ip routing
+ip route 0.0.0.0 0.0.0.0 192.168.229.1
 ```
 
-
-### Ajout de la Route par Défaut
+### 2.7 Listes de contrôle d’accès
 
 ```bash
-ip route 0.0.0.0 0.0.0.0 10.0.0.1
+ip access-list extended ALLOW_SSH_VLAN220
+ 10 permit tcp 10.10.10.0 0.0.0.255 any eq 22
+ 20 deny   tcp any any eq 22
+ 30 permit ip any any
 ```
 
+### 2.8 Agrégation et ports trunk
 
-#### Description
-
-Le routage IP permet la communication entre les VLANs et le réseau extérieur. La route par défaut dirige le trafic inconnu vers le routeur principal (10.0.0.1).
-
----
-
-## 🔄 **6. Configuration des Ports**
-
-### 🛠️ Ports en Mode Trunk
-
-<details>
-<summary><strong>Afficher la configuration des ports Trunk</strong></summary>
-
-<pre>
-interface GigabitEthernet1/0/24
+```bash
+! Port‑Channel d’uplink principal
+interface Port-channel1
  switchport mode trunk
- no shutdown
 !
-interface GigabitEthernet1/0/23
+interface GigabitEthernet1/0/18
+ description "Uplink LACP"
  switchport mode trunk
- no shutdown
+ channel-group 1 mode active
+!
+interface GigabitEthernet1/0/19
+ description "Uplink LACP"
+ switchport mode trunk
+ channel-group 1 mode active
+!
+! Trunks additionnels
+interface GigabitEthernet1/0/20
+ switchport mode trunk
+!
+interface GigabitEthernet1/0/21
+ switchport mode trunk
 !
 interface GigabitEthernet1/0/22
  switchport mode trunk
- no shutdown
+!
+interface GigabitEthernet1/0/23
+ switchport mode trunk
+!
+interface GigabitEthernet1/0/24
+ switchport mode trunk
+```
+
+### 2.9 Ports d’accès
+
+```bash
+interface GigabitEthernet1/0/1
+ switchport mode access
+ switchport access vlan 220
 !
 interface GigabitEthernet1/0/2
- switchport mode trunk
- no shutdown
+ switchport mode access
+ switchport access vlan 220
 !
-interface GigabitEthernet1/0/1
- switchport mode trunk
- no shutdown
-</pre>
-
-</details>
+interface GigabitEthernet1/0/3
+ switchport mode access
+ switchport access vlan 221
+ shutdown
+!
+interface GigabitEthernet1/0/4
+ switchport mode access
+ switchport access vlan 221
+!
+interface GigabitEthernet1/0/5
+ switchport mode access
+ switchport access vlan 222
+!
+interface GigabitEthernet1/0/6
+ switchport mode access
+ switchport access vlan 222
+!
+interface GigabitEthernet1/0/7
+ switchport mode access
+ switchport access vlan 223
+!
+interface GigabitEthernet1/0/8
+ switchport mode access
+ switchport access vlan 223
+!
+interface GigabitEthernet1/0/9
+ switchport mode access
+ switchport access vlan 224
+!
+interface GigabitEthernet1/0/10
+ switchport mode access
+ switchport access vlan 224
+```
 
 ---
 
-## 📚 **Conclusion**
+## 3. Conclusion
 
-La configuration du switch **SW-core-tours** garantit une connectivité réseau robuste et fiable. En tant que switch cœur, il gère l'agrégation et le routage du trafic tout en offrant une sécurité et une performance optimales pour l'infrastructure de SportLudiques. 🌐🎉'est ca mon css pour le rendu genre quand tu afihce les vlan c'est la balise pre qu'il faut mettre.
+La documentation reflète désormais la configuration effective de **TRS‑SW‑CORE** :
+
+- **Administration sécurisée** via le VLAN 220, ACL ciblée et SSH v2.
+- **Segmentation étendue** (VLAN 125, 220‑229) avec SVIs et relais DHCP.
+- **Connectivité redondante** grâce au Port‑Channel 1 et à plusieurs trunks.
+- **Passerelle par défaut** vers 192.168.229.1, assurant la sortie Internet.
+
+Cette base garantit la performance, la résilience et la conformité aux standards Sportludique, tout en restant prête pour des extensions futures (QoS, 802.1X, monitoring SNMP). 

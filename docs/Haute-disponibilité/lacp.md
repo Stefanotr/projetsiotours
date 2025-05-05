@@ -1,88 +1,61 @@
-# Configuration du LACP avec Cisco
+# Guide de configuration – Agrégation de liens (LACP)
 
-Ce guide explique comment configurer un groupe d'agrégation de liens (LACP) sur un switch Cisco. Nous allons lier plusieurs interfaces physiques dans un **Port-channel** (groupe LAG) pour renforcer la disponibilité et la bande passante.
+## 1. Contexte : agrégation entre **TRS‑SW‑CORE** et l’hyperviseur Proxmox
 
-## Contexte
+Pour fournir à la plateforme de virtualisation Proxmox un accès réseau **haut débit** et **tolérant aux pannes**, deux liaisons Gigabit (*Gi1/0/18* et *Gi1/0/19*) du switch **TRS‑SW‑CORE** sont agrégées via **LACP** dans le **Port‑channel 1**. Ce lien logique, présenté côté Proxmox sous forme de bond 802.3ad, permet :
 
-Dans ce scénario, nous avons plusieurs interfaces sur le switch qui se connectent à différentes VLANs, ainsi que deux interfaces dédiées à LACP. Ces interfaces forment un **Port-channel** (ou LAG), qui assure la connectivité entre notre cœur de réseau et le reste de l'infrastructure.
+- **Addition de la bande passante** : cumule le débit des liens physiques ;
+- **Basculage automatique** : maintien de la connectivité si un câble ou un transceiver tombe ;
+- **Transport multi‑VLAN** : chaque réseau (management, production, DMZ…) reste isolé tout en partageant la même paire de fibres.
+
+Cette architecture élimine les points de défaillance uniques entre le cœur et l’hyperviseur tout en simplifiant la configuration IP côté Proxmox.
 
 ---
 
-## Configuration de base du Port-channel
+## 2. Procédure de configuration
+
+### 2.1 Création de l’interface logique
 
 ```bash
 interface Port-channel1
- switchport mode trunk
+ description Uplink_Proxmox_Agreg
+ switchport mode trunk            # Transporte les VLAN utilisés par les VMs
+ ! Optionnel : limiter la liste des VLAN
+ ! switchport trunk allowed vlan 125,220-229
 ```
 
-Cette commande crée une **interface logique** appelée `Port-channel1`, qui agrège plusieurs interfaces physiques. Le mode **trunk** est activé pour transporter plusieurs VLANs à travers le lien.
-
----
-
-## Configuration des interfaces physiques
-
-Voici comment les interfaces physiques sont configurées pour appartenir à différents VLANs et participer à l'agrégation de liens :
+### 2.2 Ajout des interfaces physiques
 
 ```bash
 interface GigabitEthernet1/0/18
- description "int LCAP"
+ description Proxmox_LACP_1
  switchport mode trunk
- channel-group 1 mode active
-```
-
-```bash
+ channel-group 1 mode active       # Négociation LACP
+!
 interface GigabitEthernet1/0/19
- description "int LCAP"
+ description Proxmox_LACP_2
  switchport mode trunk
- channel-group 1 mode active
+ channel-group 1 mode active       # Négociation LACP
 ```
 
-Ces interfaces sont configurées avec le mode **trunk** pour permettre le passage de plusieurs VLANs et ajoutées au **Port-channel1** en utilisant la commande `channel-group`. Le mode `active` signifie que LACP est activé sur ces interfaces.
-
----
-
-## Configuration VLAN des autres interfaces
-
-Chaque interface est affectée à un VLAN spécifique. Voici quelques exemples :
+### 2.3 Validation
 
 ```bash
-interface GigabitEthernet1/0/1
- switchport access vlan 220
- switchport mode access
-```
+# Afficher la configuration du Port-channel
+show run interface Port-channel1
 
-```bash
-interface GigabitEthernet1/0/3
- switchport access vlan 221
- switchport mode access
- shutdown
+# Vérifier l’état LACP et les membres
+show etherchannel summary
 ```
-
-* Les interfaces sont configurées en mode **access** pour faire partie d'un VLAN unique.
-* L'interface `GigabitEthernet1/0/3` est désactivée avec la commande `shutdown` pour éviter tout trafic.
 
 ---
 
-## Vérification de la configuration
+## 3. Conclusion
 
-Une fois la configuration terminée, vous pouvez utiliser la commande suivante pour vérifier l'état du Port-channel et des interfaces physiques qui y sont associées :
+L’agrégation LACP entre **TRS‑SW‑CORE** et Proxmox offre :
 
-```bash
-show running-config interface Port-channel1
-```
+- **Débit agrégé** correspondant à la somme des interfaces membres ;
+- **Continuité de service** grâce au basculement instantané sur le lien restant ;
+- **Gestion unifiée** avec un seul Port‑channel côté switch et un bond 802.3ad côté hyperviseur.
 
-Cela affichera la configuration actuelle de l'interface `Port-channel1`, y compris les interfaces physiques associées et leur état LACP.
-
----
-
-## Explication
-
-Le **LACP** (Link Aggregation Control Protocol) permet de regrouper plusieurs liens physiques pour former un lien logique, augmentant ainsi la bande passante disponible et assurant la redondance en cas de défaillance d'un lien. Dans cet exemple, les interfaces **GigabitEthernet1/0/18** et **GigabitEthernet1/0/19** sont agrégées dans un seul **Port-channel** pour garantir la continuité entre le cœur du réseau et le reste de l'infrastructure.
-
-*Le LACP est particulièrement utile pour garantir une haute disponibilité dans les réseaux à grande échelle.*
-
----
-
-## Conclusion
-
-Cette configuration de LACP permet d'améliorer la **tolérance aux pannes** et d'augmenter la **bande passante** disponible en agrégant plusieurs interfaces physiques en un seul **Port-channel**.
+Cette configuration garantit des performances réseau optimales pour l’ensemble des machines virtuelles tout en renforçant la disponibilité de l’infrastructure.

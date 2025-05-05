@@ -1,60 +1,60 @@
-# Configuration du HSRP pour les routeurs TRS-GW-01-FIBRE et TRS-GW-02-ADSL
+# Guide de configuration – HSRP sur **TRS‑GW‑01‑FIBRE** et **TRS‑GW‑02‑ADSL**
 
-## 1. Introduction
+## 1. Contexte : redondance de passerelle
 
-Le **HSRP** (Hot Standby Router Protocol) permet de configurer plusieurs routeurs pour partager une adresse IP virtuelle. Ce protocole assure une redondance et une continuité de service en cas de panne du routeur principal. Dans cette configuration, le routeur avec la priorité la plus élevée devient le routeur principal (actif), tandis que l'autre routeur prend le rôle de routeur de secours (standby).
+Le protocole **HSRP** (Hot Standby Router Protocol) permet de présenter une passerelle IP virtuelle unique aux hôtes d’un même segment réseau. Lorsqu’il est mis en œuvre sur les routeurs **TRS‑GW‑01‑FIBRE** et **TRS‑GW‑02‑ADSL**, il garantit :
 
+- **Continuité de service** : en cas de défaillance du routeur actif, le routeur de secours prend immédiatement le relais ;
+- **Simplicité de configuration côté client** : une seule passerelle par défaut (IP virtuelle) à diffuser sur le VLAN 224 ;
+- **Basculement contrôlé** : prise en compte des priorités et du mécanisme *preempt* pour le retour automatique du routeur principal.
 
-## 2. Configuration du HSRP sur TRS-GW-01-FIBRE
+---
 
-Le routeur **TRS-GW-01-FIBRE** sera configuré comme **routeur principal** grâce à une priorité plus élevée (120). Voici la configuration :
+## 2. Procédure de configuration
 
-```bash
-conf t
-interface GigabitEthernet0/0.224
- standby 1 ip 192.168.224.1
- standby 1 priority 120
- standby 1 preempt
-exit
-```
-
-### Explications des commandes :
-- **standby 1 ip 192.168.224.1** : Définit l'adresse IP virtuelle HSRP pour le VLAN 224. Cette adresse sera utilisée par les hôtes pour accéder au réseau, indépendamment de quel routeur est actif.
-- **standby 1 priority 120** : Définit la priorité de **TRS-GW-01-FIBRE** à 120. Avec cette priorité, ce routeur sera le principal.
-- **standby 1 preempt** : Permet à **TRS-GW-01-FIBRE** de reprendre son rôle de routeur principal en cas de rétablissement après une panne.
-
-## 3. Configuration du HSRP sur TRS-GW-02-ADSL
-
-Le routeur **TRS-GW-02-ADSL** sera configuré comme **routeur de secours** avec une priorité plus basse (115). Il prendra le relais si le routeur principal devient indisponible.
+### 2.1 Routeur principal – **TRS‑GW‑01‑FIBRE**
 
 ```bash
 conf t
 interface GigabitEthernet0/0.224
- standby 1 ip 192.168.224.1
- standby 1 priority 115
- standby 1 preempt
+ standby 1 ip 192.168.224.1      ! Adresse IP virtuelle
+ standby 1 priority 120          ! Priorité la plus élevée
+ standby 1 preempt               ! Reprend le rôle actif après rétablissement
 exit
 ```
 
-### Explications des commandes :
-- **standby 1 priority 115** : Définit la priorité de **TRS-GW-02-ADSL** à 115, ce qui le désigne comme routeur de secours.
-- **standby 1 preempt** : Permet au routeur de reprendre son rôle en cas de retour de l'interface ou si le routeur principal (TRS-GW-01-FIBRE) est désactivé.
-
-## 4. Vérification de la configuration HSRP
-
-Pour vérifier que le HSRP est correctement configuré et opérationnel, exécutez la commande suivante sur les deux routeurs :
+### 2.2 Routeur de secours – **TRS‑GW‑02‑ADSL**
 
 ```bash
-show standby
+conf t
+interface GigabitEthernet0/0.224
+ standby 1 ip 192.168.224.1      ! Adresse IP virtuelle partagée
+ standby 1 priority 115          ! Priorité inférieure → standby
+ standby 1 preempt               ! Peut redevenir actif si l’autre chute
+exit
 ```
 
-### Sortie typique :
-Cette commande affichera les informations suivantes :
-- L'adresse IP virtuelle HSRP (192.168.224.1)
-- L'état du routeur (actif pour TRS-GW-01-FIBRE, standby pour TRS-GW-02-ADSL)
-- Les priorités configurées
-- Le temps de basculement (préemption)
+> **Remarque** : vérifiez que les adresses IP physiques des deux routeurs sur le sous‑interface *GigabitEthernet0/0.224* restent uniques (ex. : 192.168.224.2 et .3) et que le délai *HSRP hello/hold* par défaut (3/10 s) couvre vos exigences de convergence. Adaptez‑le avec `standby 1 timers msec 1000 3000` si nécessaire.
 
-## 5. Conclusion
+### 2.3 Validation
 
-Avec cette configuration, **TRS-GW-01-FIBRE** est le routeur principal avec une priorité de 120, tandis que **TRS-GW-02-ADSL** est le routeur de secours avec une priorité de 115. En cas de défaillance de **TRS-GW-01-FIBRE**, **TRS-GW-02-ADSL** prendra automatiquement le relais, garantissant une continuité du service. Une fois le routeur principal rétabli, il redeviendra automatiquement actif grâce à la fonctionnalité de préemption.
+```bash
+show standby brief        ! Résumé de l’état HSRP
+show standby              ! Détails : priorité, rôle, minuteurs
+```
+
+Sortie attendue :
+
+- **TRS‑GW‑01‑FIBRE** : `State = Active`, `Priority = 120`, `Virtual IP = 192.168.224.1` ;
+- **TRS‑GW‑02‑ADSL** : `State = Standby`, `Priority = 115`, même IP virtuelle.
+
+---
+
+## 3. Conclusion
+
+Cette mise en œuvre d’HSRP offre à Sportludique une passerelle virtuelle résiliente sur le VLAN 224 :
+
+- **Actif** : **TRS‑GW‑01‑FIBRE** (priority 120) ;
+- **Secours** : **TRS‑GW‑02‑ADSL** (priority 115).
+
+En cas de panne du routeur principal, la bascule est automatique et transparente ; lors de son retour, le mécanisme *preempt* restitue la hiérarchie initiale sans intervention manuelle.

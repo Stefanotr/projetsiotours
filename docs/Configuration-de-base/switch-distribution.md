@@ -1,176 +1,127 @@
-# Configuration du Switch core
+# Guide de configuration – Switch de distribution **SW‑DISTRIB‑TOURS**
 
-## 1. Configuration de base (du nom d'hôte et d'un utilisateur pour le SSH)
+## 1. Contexte : rôle de distribution et segmentation réseau
 
-### Nom d'hôte
-```bash
-hostname SW-distrib-tours
-```
+Le switch **SW‑DISTRIB‑TOURS** constitue le cœur de distribution du site de Tours ; il agrège les liaisons d’accès, concentre les VLAN et relaie le trafic vers la passerelle Internet. Ses objectifs sont :
 
-### Configuration d'un mot de passe pour acceder au mode priviliéger
-```bash
-enable secret password
-```
-
-### Création d'un utilisateur admin avec accès SSH
-
-```bash
-username admin privilege 15 secret admin
-```
-
-### Configuration de la bannière de message du jour (MOTD)
-
-```bash
-banner motd 
-***************************************************************************
-*                   	Welcome to SportLudiques Network               	*
-***************************************************************************
-*                                                                     	*
-*   	Authorized access only. All activities are monitored.         	*
-*                                                                     	*
-*  	"Empowering Sports and Fun with Every Connection!"             	*
-*                                                                     	*
-*   	For support, contact IT at: support@sportludiques.com         	*
-*                                                                     	*
-***************************************************************************
-```
-
-Voici une description expliquant l'importance d'un VLAN de management pour la sécurité, intégrée dans la documentation en Markdown :
-
-## 2. VLAN de management (VLAN 220)
-
-### Configuration du VLAN 220
-```bash
-interface Vlan220
- ip address 10.10.10.20 255.255.255.0
- no shutdown
-```
-
-### Pourquoi un VLAN de management ?
-
-Le VLAN de management est crucial pour isoler la gestion du réseau des autres trafics utilisateur. Voici les principales raisons de son importance :
-
-- **Sécurité accrue** : En isolant les communications de gestion du reste du réseau, il devient plus difficile pour des utilisateurs non autorisés d'accéder aux équipements réseau. Cela réduit le risque de compromission.
-  
-- **Meilleure surveillance** : Le VLAN de management permet de suivre et de contrôler plus facilement les accès aux équipements réseau, facilitant ainsi la détection des activités suspectes.
-
-- **Fiabilité et stabilité** : Le fait d’avoir un VLAN dédié à la gestion des équipements assure que les modifications, mises à jour et autres actions administratives ne sont pas perturbées par le trafic réseau standard.
-
-## 3. Domaine et SSH
-
-### Configuration du Domaine
-```bash
-ip domain-name example.com
-```
-
-### Configuration SSH
-```bash
-crypto key generate rsa modulus 2048
-ip ssh version 2
-line vty 0 4
- login local
- transport input ssh
-```
+- **Segmentation** : isoler les flux par usage (management, DMZ, production, conception, etc.) ;
+- **Haute disponibilité** : proposer des liaisons trunk redondantes vers le cœur et éviter les boucles via Spanning Tree ;
+- **Sécurité d’administration** : limiter la gestion de l’équipement au VLAN de management et aux sessions SSH chiffrées.
 
 ---
 
-### Pourquoi SSH et pas Telnet ?
+## 2. Procédure de configuration
 
-**SSH (Secure Shell)** est un protocole de gestion à distance sécurisé qui crypte toutes les communications entre un administrateur et un équipement réseau. Contrairement à **Telnet**, qui transmet les données (y compris les mots de passe) en texte clair, SSH garantit que toutes les informations échangées sont chiffrées et protégées des interceptions.
+### 2.1 Configuration de base
 
-Les avantages principaux de SSH sont :
-- **Sécurité renforcée** : SSH chiffre toutes les données, ce qui empêche les attaques de type "man-in-the-middle" ou l'espionnage des informations sensibles telles que les mots de passe.
-  
-- **Authentification** : Avec SSH, il est possible d'utiliser des clés cryptographiques pour l'authentification, ce qui renforce encore plus la sécurité.
+```bash
+conf t
+hostname SW-DISTRIB-TOURS
+!
+! Mot de passe privilégié
+enable secret <Secret_Privileged_Mode>
+!
+! Compte d’administration
+username admin privilege 15 secret <Secret_Admin>
+!
+! Bannière légale
+banner motd ^
+***************************************************************************
+*      Accès réservé : toute activité est enregistrée et auditée.         *
+*      Support IT : support@sportludiques.com                              *
+***************************************************************************
+^
+exit
+```
 
-- **Confidentialité** : SSH assure que toutes les commandes exécutées et les données échangées restent privées.
-
-## 4. Autres VLANs
-
-### Création des VLANs avec leurs noms
-
-<details>
-<summary>Cliquez pour afficher la configuration des VLANs</summary>
+### 2.2 VLAN de management et SVI
 
 ```bash
 vlan 220
  name Management
 !
-vlan 221
- name Services
-!
-vlan 222
- name DMZ
-!
-vlan 223
- name (à définir)
-!
-vlan 224
- name Interconnexion
-!
-vlan 225
- name Production
-!
-vlan 226
- name Conception
-```
-</details>
-
-### Description des VLANs
-- **VLAN 220 - Management** : Ce VLAN est utilisé pour la gestion des équipements réseau. Il permet d'isoler le trafic de gestion (comme les accès SSH ou l'administration des équipements) du reste du réseau, garantissant ainsi une meilleure sécurité et stabilité.
-  
-- **VLAN 221 - Services** : Ce VLAN est dédié aux services critiques du réseau, tels que les serveurs d'applications, de bases de données ou d'authentification. Il assure une communication fiable et sécurisée entre les services essentiels.
-
-- **VLAN 222 - DMZ** : Le VLAN DMZ est utilisé pour héberger des serveurs accessibles depuis l'extérieur, tels que les serveurs web ou mail. Il offre une zone de sécurité intermédiaire entre le réseau interne et l'extérieur, protégeant le réseau principal des attaques.
-
-- **VLAN 223 - (à définir)** : Ce VLAN est encore à définir en fonction des besoins futurs ou des évolutions du réseau. Il pourrait être utilisé pour des services spécifiques ou pour des segments supplémentaires de l'infrastructure.
-
-- **VLAN 224 - Interconnexion** : Ce VLAN permet d'assurer la communication entre différents segments du réseau ou avec des réseaux tiers. Il est souvent utilisé pour connecter plusieurs sites ou infrastructures, facilitant l'échange de données tout en maintenant une séparation logique du trafic.
-
-- **VLAN 225 - Production** : Ce VLAN est réservé aux systèmes et services en environnement de production. Il est conçu pour fournir des performances optimales et une sécurité renforcée aux applications critiques de l'entreprise.
-
-- **VLAN 226 - Conception** : Utilisé par les équipes de développement et d'ingénierie, ce VLAN permet de tester de nouvelles applications ou configurations sans impacter l'environnement de production. Il garantit une séparation nette entre les activités de conception et les systèmes en cours d'utilisation.
-
-### Assignation de l'adresse IP sur le VLAN de management
-
-```bash
 interface Vlan220
  ip address 10.10.10.20 255.255.255.0
  no shutdown
 ```
 
-## 6. Configuration des Ports
+### 2.3 Définition des VLANs de service
 
-### Schéma du SW-distrib
-
-![swdistribdash](Images/swdistribdash.png)
-
-### Ports en mode Trunk
 ```bash
-interface GigabitEthernet0/24
- switchport mode trunk
- no shutdown
+vlan 221
+ name Services
+vlan 222
+ name DMZ
+vlan 223
+ name A_Definir
+vlan 224
+ name Interconnexion
+vlan 225
+ name Production
+vlan 226
+ name Conception
 ```
 
-### Ports en mode Access
+### 2.4 Sécurisation de l’accès distant (SSH)
+
 ```bash
+ip domain-name sportludique.fr
+crypto key generate rsa modulus 2048
+ip ssh version 2
+line vty 0 4
+ login local
+ transport input ssh
+exit
+```
+
+### 2.5 Configuration des ports
+
+```bash
+! Uplink trunk vers le cœur
+interface GigabitEthernet0/24
+ description Uplink_Core
+ switchport mode trunk
+ spanning-tree portfast disable
+ no shutdown
+!
+! Ports d’accès utilisateurs
 interface GigabitEthernet0/1
+ description Poste_Admin1
  switchport mode access
  switchport access vlan 220
+ spanning-tree portfast
  no shutdown
 !
 interface GigabitEthernet0/2
+ description Poste_Admin2
  switchport mode access
  switchport access vlan 220
+ spanning-tree portfast
  no shutdown
 !
 interface GigabitEthernet0/3
+ description Serveur_DMZ
  switchport mode access
  switchport access vlan 222
+ spanning-tree portfast
  no shutdown
 !
 interface GigabitEthernet0/4
+ description Banc_Conception
  switchport mode access
  switchport access vlan 226
+ spanning-tree portfast
  no shutdown
 ```
+
+---
+
+## 3. Conclusion
+
+Cette configuration confère à **SW‑DISTRIB‑TOURS** :
+
+- Une **administration sécurisée** au travers du VLAN 220 et de SSH v2 ;
+- Une **segmentation claire** grâce à des VLAN dédiés aux différents usages ;
+- Une **intégration transparente** avec le cœur du réseau par le trunk principal, prêt à être doublé pour la redondance si nécessaire.
+
+Le switch est ainsi aligné sur les standards Sportludique et peut évoluer vers des fonctionnalités avancées (QoS, 802.1X, agrégation de liens, supervision SNMP) sans modifier la configuration actuelle.

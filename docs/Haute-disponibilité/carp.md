@@ -1,104 +1,93 @@
-# 🔄 Configuration de la Haute Disponibilité (CARP) avec PFsense
+# Guide de configuration – Haute disponibilité CARP sur pfSense
 
-Ce guide explique comment configurer une paire de pare-feux PFsense en haute disponibilité grâce au protocole CARP.
+## 1. Contexte : résilience des pare‑feux
 
----
-
-## 🛠️ Prérequis
-- ⚙️ Deux PFsense configurés (un principal et un secondaire).
-- 🧾 Adressage réseau défini pour chaque VLAN.
-- 📡 Une interface Ethernet dédiée à la synchronisation entre les deux PFsense.
+Pour éviter tout point de défaillance unique, la plateforme Sportludique s’appuie sur deux pare‑feux pfSense en **mode haute disponibilité**. Le protocole **CARP** (Common Address Redundancy Protocol) publie des adresses IP virtuelles communes aux deux nœuds ; l’instance « Master » traite le trafic, tandis que la seconde reste en « Backup » et prend immédiatement le relais en cas de panne.
 
 ---
 
-## 🚀 Étapes de Configuration
+## 2. Procédure de configuration
 
-### 1️⃣ Configuration de l'Interface dédiée
-1. Accédez à **Interfaces > Assign** pour ajouter une nouvelle interface Ethernet dédiée sur **chaque PFsense**.
-2. Configurez les adresses IP sur le même réseau pour les deux pare-feux. Par exemple :
-   - PFsense Principal : `172.28.138.1`
-   - PFsense Secondaire : `172.28.138.2`
-3. Activez les interfaces et sauvegardez.
+### 2.1 Interface dédiée à la synchronisation
 
-```bash
-# Exemple de configuration CLI
-ifconfig em3 172.28.138.1 netmask 255.255.255.0 up
-```
+1. Ouvrez **Interfaces › Assignments** et ajoutez l’interface physique réservée à la synchronisation.
+2. Attribuez des adresses IP dans le même sous‑réseau :
+   - Pare‑feu principal : `172.28.138.1/24`
+   - Pare‑feu secondaire : `172.28.138.2/24`
+3. Activez l’interface et sauvegardez.
+
+**PHOTO 1 – Interface Assignment**
 
 ---
 
-### 2️⃣ Configuration de la Synchronisation sur le Pare-feu Principal
-1. Rendez-vous dans **System > High Availability Sync**.
-2. Cochez **Enable State Synchronization**.
-3. Configurez les paramètres suivants :
-   - **Interface** : Interface dédiée (CARP).
-   - **Adresse du PFsense secondaire** : `172.28.138.2`.
-4. Activez la synchronisation XMLRPC :
-   - Adresse IP : `172.28.138.2`
-   - Identifiant : `admin`
-   - Mot de passe : Celui de l’utilisateur administrateur.
-5. Sélectionnez toutes les options de synchronisation et cliquez sur **Save**.
+### 2.2 Synchronisation sur le pare‑feu principal
+
+1. Rendez‑vous dans **System › High Availability Sync**.
+2. Cochez **Enable State Synchronization** et sélectionnez l’interface dédiée.
+3. Renseignez l’adresse IP du secondaire (`172.28.138.2`).
+4. Activez la synchronisation **XMLRPC**, puis indiquez :
+   - IP du secondaire : `172.28.138.2`
+   - Identifiants administrateur.
+5. Sélectionnez tous les objets à synchroniser et cliquez sur **Save**.
+
+**PHOTO 2 – High Availability Sync (Primary)**
 
 ---
 
-### 3️⃣ Configuration des Règles Firewall
-1. Accédez à **Firewall > Rules** sur l'interface dédiée (CARP).
-2. Ajoutez les règles suivantes :
+### 2.3 Règles firewall sur l’interface CARP
 
-   - **Règle 1 : Synchronisation d'état**
-     - Action : PASS
-     - Protocole : PFSYNC
-     - Source : `CARP1 net`
-     - Destination : `CARP1 address`
-   - **Règle 2 : Autorisation XMLRPC**
-     - Action : PASS
-     - Protocole : TCP
-     - Source : `CARP1 address`
-     - Destination : `CARP1 net`
-     - Port : 443
+Dans **Firewall › Rules** (onglet de l’interface dédiée) :
 
-```bash
-# Exemple d'autorisation sur l'interface CARP
-pfctl -a "carp" -sr
-```
+| Action | Proto | Source          | Destination       | Port | Objet |
+|--------|-------|-----------------|-------------------|------|-------|
+| Pass   | PFSYNC | CARP net        | CARP address      | —    | Synchronisation d’état |
+| Pass   | TCP   | CARP address    | CARP net          | 443  | XMLRPC |
+
+Appliquez et sauvegardez.
+
+**PHOTO 3 – Rules on CARP Interface**
 
 ---
 
-### 4️⃣ Création des VIP (Virtual IPs)
-1. Accédez à **Firewall > Virtual IPs**.
-2. Cliquez sur **Add** pour ajouter une nouvelle VIP.
-3. Configurez comme suit :
-   - **Type** : CARP
-   - **Interface** : WAN ou LAN.
-   - **Adresse IP** : Nouvelle IP partagée entre les deux PFsense.
-   - **Mot de passe** : Configurez un mot de passe sécurisé.
-4. Répétez l’opération pour chaque interface (WAN, LAN, etc.).
+### 2.4 Création des adresses virtuelles (VIP)
+
+1. Accédez à **Firewall › Virtual IPs** et cliquez sur **Add**.
+2. Paramétrez :
+   - **Type** : CARP
+   - **Interface** : WAN (ou LAN)
+   - **Virtual IP** : adresse partagée (ex. `x.x.x.x/24`)
+   - **VHID** et **Password** sécurisés
+3. Répétez pour chaque interface (WAN, LAN, DMZ…).
+
+**PHOTO 4 – Virtual IPs list**
 
 ---
 
-### 5️⃣ Configuration sur le Pare-feu Secondaire
-1. Accédez à **System > High Availability Sync**.
-2. Cochez **Enable State Synchronization**.
-3. Configurez les paramètres suivants :
-   - **Interface** : Interface dédiée (CARP).
-   - **Adresse du PFsense principal** : `172.28.138.1`.
+### 2.5 Configuration minimale sur le secondaire
 
-⚠️ **Note** : Ne configurez pas la synchronisation XMLRPC sur le secondaire, elle sera gérée par le primaire.
+Dans **System › High Availability Sync**, cochez uniquement **Enable State Synchronization**, sélectionnez l’interface CARP et renseignez l’IP du primaire (`172.28.138.1`). **Ne configurez pas** XMLRPC ici ; il sera géré par le primaire.
+
+**PHOTO 5 – High Availability Sync (Secondary)**
 
 ---
 
-### 6️⃣ Finalisation et Test
-1. Mettez à jour les adresses des routes et passerelles pour pointer vers les VIP.
-2. Testez la bascule en simulant un arrêt du PFsense principal pour valider la haute disponibilité.
+### 2.6 Validation et tests
+
+1. Mettez à jour les passerelles sur vos hôtes/routeurs pour pointer vers les VIP.
+2. Simulez une panne du pare‑feu primaire et observez le basculement instantané (Status › CARP).
+
+**PHOTO 6 – Status CARP**
 
 ---
 
-## 📝 Notes Importantes
-- La synchronisation s’effectue automatiquement pour les configurations XMLRPC.
-- Les deux PFsense doivent avoir des configurations réseau identiques pour éviter les incohérences.
-- Utilisez une interface dédiée pour CARP afin d’éviter tout conflit.
+## 3. Notes importantes
+
+- Les configurations des deux nœuds doivent rester **strictement identiques** (packages, règles, certificates, etc.). XMLRPC s’en charge ; vérifiez les journaux après chaque modification.
+- Utilisez toujours une interface physique **dédiée** pour CARP afin d’isoler le trafic de synchronisation.
+- Pensez à autoriser le protocole **PFSYNC** et le port **443** (XMLRPC) sur l’interface CARP uniquement.
 
 ---
 
-## 🎉 Résultat
-Votre infrastructure est maintenant configurée en haute disponibilité avec PFsense et CARP. Testez la bascule pour garantir un fonctionnement optimal !
+## 4. Conclusion
+
+Votre cluster pfSense bénéficie désormais d’une **haute disponibilité** : les VIP maintiennent la connectivité côté clients, la synchronisation PFSYNC préserve les états des connexions, et XMLRPC réplique la configuration. Vérifiez régulièrement le statut CARP pour anticiper tout désalignement entre les nœuds.

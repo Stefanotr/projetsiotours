@@ -1,91 +1,53 @@
-# 🌐 Configuration Avancée du Routeur **TRS-GW-01-FIBRE** 🚀
+# Configuration avancée du routeur **TRS‑GW‑01‑FIBRE**
 
-Ce guide vous accompagne pas à pas dans la configuration complète du routeur **TRS-GW-01-FIBRE**, couvrant les aspects de base, les interfaces, la sécurité SSH, le NAT, et le routage.
+## 1. Contexte : lien fibre dédié et exigences de fiabilité
+
+Sportludique déploie un accès fibre optique symétrique pour couvrir les besoins suivants :
+
+- **Capacité élevée** : distribution de contenus multimédias en direct et synchronisation volumineuse de données entre sites ;
+- **Faible latence** : sessions de jeu en ligne, webinaires interactifs et solutions de bureautique cloud ;
+- **Qualité de service** : séparation des flux critiques (paiement, VPN, supervision) du trafic moins prioritaire ;
+- **Sécurité renforcée** : administration distante via SSH et traçabilité des modifications.
+
+Le routeur TRS‑GW‑01‑FIBRE assure la passerelle principale entre le réseau interne et Internet via une **liaison fibre dédiée**. La continuité de service peut être complétée par un lien de secours (ADSL ou 4G) non décrit ici.
 
 ---
 
-## 📋 **Objectif**
+## 2. Procédure de configuration
 
-Configurer un routeur fiable et sécurisé pour une infrastructure réseau professionnelle.
-
----
-
-## 🛠️ **Étape 1 : Configuration de Base**
-
-### 🔧 Nom d'hôte
-
-Définissez un nom d'hôte pour identifier le routeur dans le réseau :
+### 2.1 Configuration de base
 
 ```bash
 conf t
 hostname TRS-GW-01-FIBRE
+!
+! Sécurisation du mode privilégié
+enable secret <Secret_Privileged_Mode>
+!
+! Compte d’administration SSH
+username admin privilege 15 secret <Secret_Admin>
+!
+! Bannière légale
+banner motd ^
+***************************************************************************
+*          Accès réservé : toute activité est enregistrée et auditée.      *
+*     Support IT : support@sportludique.com                                 *
+***************************************************************************
+^
 exit
 ```
 
-### 🔑 Mot de passe Mode Privilégié
-
-Ajoutez un mot de passe pour sécuriser l'accès au mode privilégié :
+### 2.2 Configuration des interfaces
 
 ```bash
-enable secret VotreMotDePasseSécurisé
-```
-
-### 👤 Création d'un Utilisateur Administrateur
-
-Créez un utilisateur avec des privilèges élevés et un accès SSH :
-
-```bash
-username admin privilege 15 secret VotreMotDePasseAdmin
-```
-
-### 💬 Message de Bienvenue (MOTD)
-
-Ajoutez une bannière personnalisée pour informer les utilisateurs connectés :
-
-<details>
-<summary><strong>Afficher le message de bannière</strong></summary>
-
-```bash
-banner motd 
-***************************************************************************
-*               Bienvenue dans le Réseau de SportLudiques 🌟              *
-***************************************************************************
-*                                                                         *
-*    ⚠️ Accès réservé. Toutes les activités sont surveillées.            *
-*                                                                         *
-*   ✉️ Support IT : support@sportludiques.com                             *
-*                                                                         *
-***************************************************************************
-```
-</details>
-
----
-
-## 🌐 **Étape 2 : Configuration des Interfaces**
-
-### 🌟 Interface VLAN Management (VLAN 220)
-
-```bash
-conf t
+! VLAN Management (VLAN 220)
 interface GigabitEthernet0/0.220
  encapsulation dot1Q 220
  ip address 10.10.10.1 255.255.255.0
  no shutdown
 exit
-```
 
-#### Pourquoi un VLAN de management ?
-
-Un VLAN de management isole le trafic de gestion réseau des autres trafics utilisateurs pour des raisons de sécurité, de surveillance et de fiabilité.
-
----
-
-### 🌉 Interface VLAN Interconnexion (VLAN 224)
-
-<details>
-<summary><strong>Afficher la configuration de l'interface</strong></summary>
-
-```bash
+! VLAN Interconnexion (VLAN 224)
 interface GigabitEthernet0/0.224
  encapsulation dot1Q 224
  ip address 192.168.224.2 255.255.255.0
@@ -93,15 +55,8 @@ interface GigabitEthernet0/0.224
  ip virtual-reassembly in
  no shutdown
 exit
-```
-</details>
 
----
-
-### 🌍 Interface WAN
-
-```bash
-conf t
+! Interface WAN fibre (accès dédié)
 interface GigabitEthernet0/1
  ip address 183.44.37.1 255.255.255.252
  ip nat outside
@@ -110,22 +65,12 @@ interface GigabitEthernet0/1
 exit
 ```
 
----
+> **Note :** si une seconde fibre ou un lien de secours est prévu, répliquer la section WAN sur l’interface concernée et mettre en place un suivi (track) pour la route par défaut.
 
-## 🔒 **Étape 3 : Configuration de la Sécurité SSH**
-
-### 🏷️ Nom de Domaine
-
-Ajoutez un nom de domaine pour activer SSH :
+### 2.3 Sécurisation SSH
 
 ```bash
 ip domain-name sportludique.fr
-```
-
-### 🔐 Configuration SSH
-
-```bash
-conf t
 ip ssh version 2
 line vty 0 4
  login local
@@ -133,80 +78,49 @@ line vty 0 4
 exit
 ```
 
-#### Pourquoi SSH et pas Telnet ?
-
-SSH offre une connexion chiffrée et sécurisée, contrairement à Telnet qui transmet les données en clair. Les avantages incluent :
-- **Sécurité renforcée** avec chiffrement des données.
-- **Authentification par clé cryptographique** pour une meilleure protection.
-- **Confidentialité totale** des commandes et données échangées.
-
----
-
-## 🔄 **Étape 4 : Configuration du NAT**
-
-### 📜 Configuration NAT
-
-<details>
-<summary><strong>Afficher la configuration complète du NAT</strong></summary>
+### 2.4 NAT et contrôle d’accès
 
 ```bash
-conf t
+! Réseaux internes autorisés à sortir
 access-list 1 permit 172.28.128.0 0.0.31.255
-access-list 1 permit 192.168.0.0 0.0.255.255
+access-list 1 permit 192.168.0.0   0.0.255.255
+!
+! NAT surcharge (PAT) vers la fibre
 ip nat inside source list 1 interface GigabitEthernet0/1 overload
-exit
 ```
-</details>
 
-#### Explication :
-- **`ip nat inside source list 1 interface GigabitEthernet0/1 overload`** : Active le NAT avec surcharge pour traduire plusieurs adresses internes en une seule adresse publique.
-- **`access-list 1 permit`** : Autorise les sous-réseaux spécifiés à utiliser le NAT.
-
----
-
-## 🚦 **Étape 5 : Routage Statique**
-
-### 🛣️ Ajoutez des Routes Statique
+### 2.5 Routage statique
 
 ```bash
+! Route par défaut vers le FAI fibre
 ip route 0.0.0.0 0.0.0.0 183.44.37.2
+!
+! Routage interne
 ip route 172.28.128.0 255.255.224.0 192.168.224.254
-ip route 192.168.0.0 255.255.0.0 192.168.224.254
-exit
+ip route 192.168.0.0   255.255.0.0   192.168.224.254
 ```
 
-#### Explication :
-- **Route par défaut :** `ip route 0.0.0.0 0.0.0.0 183.44.37.2` dirige le trafic sans destination spécifique vers l'internet.
-- **Routes spécifiques :** Les routes pour `172.28.128.0/19` et `192.168.0.0/16` assurent que le trafic destiné à ces sous-réseaux est envoyé à `192.168.224.254`.
-
----
-
-## 🧩 **Étape 6 : Validation et Tests**
-
-### ✅ Vérification des Interfaces
-
-Affichez les interfaces configurées :
+### 2.6 Validation et tests
 
 ```bash
+! État des interfaces
 show ip interface brief
-```
 
-### 🌐 Testez la Connectivité WAN
+! Test de connectivité externe
+ping 8.8.8.8 repeat 5
 
-Testez la connectivité externe :
-
-```bash
-ping 8.8.8.8
-```
-
-### 🔄 Vérifiez les Traductions NAT
-
-```bash
+! Traductions NAT actives
 show ip nat translations
 ```
 
 ---
 
-## 📚 **Conclusion**
+## 3. Conclusion
 
-Le routeur **TRS-GW-01-FIBRE** est maintenant configuré pour fournir une connectivité sécurisée, gérer le trafic interne et externe via NAT, et permettre une administration via SSH. 🌐🎉
+Cette configuration place le routeur **TRS‑GW‑01‑FIBRE** au cœur du réseau Sportludique avec :
+
+- **Sécurité** : authentification locale forte, chiffrement SSH et bannière légale ;
+- **Performance** : liaison fibre à haut débit, VLAN dédié au management et NAT optimisé ;
+- **Simplicité opérationnelle** : commandes de vérification rapides pour le support NOC.
+
+Elle fournit une base fiable et évolutive pour les futurs services (QoS avancée, IPSec, redondance multi‑WAN) tout en répondant aux exigences actuelles de l’entreprise.

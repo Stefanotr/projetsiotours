@@ -1,134 +1,83 @@
-# Documentation Complète sur l’Installation et la Configuration d’Asterisk et de Téléphones Cisco
+# Guide de déploiement – Asterisk 18 & téléphones Cisco (ToIP)
 
-Cette documentation fournit un guide étape par étape pour :
+## 1. Contexte : Téléphonie sur IP pour Sportludique
 
-- Installer **Asterisk 18.x**.
-- Préparer un **serveur TFTP** et un **DHCP** pour les téléphones.
-- Déployer et configurer des **téléphones Cisco**.
-- Configurer les fichiers principaux d’Asterisk (sip.conf, extensions.conf, voicemail.conf).
+
+L’entreprise Sportludique a besoin d’assurer une communication rapide et efficace entre ses différents services
+sur le site de Tours (Conception, Production, Informatiques). Pour répondre à cette exigence de fluidité, de
+fiabilité et d’évolutivité des échanges, la mise en place d’une solution de téléphonie sur IP (ToIP) s’impose.
+
+L’entreprise **Sportludique** vise :
+
+- la **rationalisation** des coûts téléphoniques ;
+- la **mobilité** (application Zoiper sur Wi‑Fi dédié) ;
+- l’**interopérabilité** entre postes Cisco 79×× et soft‑phones ;
+- la **qualité de service** (VLAN 125 voix, SSID ToIP, QoS en cœur).
+
+Le choix s’est porté sur **Asterisk 18** jouant le rôle d’IPBX (SIP), installé sur une VM Debian, et sur des téléphones Cisco 7942G migrés en SIP. Un couple **TFTP + DHCP** fournit le firmware et l’autoprovisioning. 
 
 ---
 
-## 1. Installation d’Asterisk 18.x
+## 2. Procédure de configuration
 
-### 1.1 Prérequis
+> Les commandes sont exécutées sous Debian 12 ; adaptez les chemins si nécessaire.
 
-Mettez à jour votre système et installez les paquets essentiels :
-
-```bash
-sudo apt update && sudo apt upgrade
-sudo apt install wget build-essential subversion
-```
-
-Placez-vous ensuite dans le répertoire `/usr/src/` et téléchargez la source :
+### 2.1 Installation d’Asterisk 18
 
 ```bash
-cd /usr/src/
+sudo apt update && sudo apt upgrade -y
+sudo apt install wget build-essential subversion -y
+cd /usr/src
 sudo wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-18-current.tar.gz
-sudo tar zxf asterisk-18-current.tar.gz
-cd asterisk-18.*/
-```
+sudo tar xzf asterisk-18-current.tar.gz
+cd asterisk-18.*
 
-### 1.2 Préparation des dépendances
-
-Asterisk nécessite certains modules. Exécutez :
-
-```bash
+# Dépendances & codecs
 sudo contrib/scripts/get_mp3_source.sh
-sudo contrib/scripts/install_prereq install
-```
+sudo contrib/scripts/install_prereq install           # choisir 33 pour la France
 
-Lorsque vous y êtes invité, entrez `33` pour la **France** (indiquant la localisation).
-
-Ensuite, lancez la configuration :
-
-```bash
 sudo ./configure
-```
-
-### 1.3 Compilation et installation
-
-Choisissez les modules à compiler via le menu **menuselect** :
-
-```bash
-sudo make menuselect
-```
-
-- Dans `menuselect`, activez le module `format mp3`.
-
-Compilez, installez et configurez Asterisk :
-
-```bash
-sudo make -j2
+sudo make menuselect    # cocher : format_mp3, res_pjsip, app_voicemail
+sudo make -j$(nproc)
 sudo make install
 sudo make samples
 sudo make config
 sudo ldconfig
 ```
 
-Activez et démarrez le service :
-
-```bash
-sudo systemctl start asterisk
-sudo asterisk -vvvr
-```
-
----
-
-### 1.4 Création de l’utilisateur et groupe Asterisk
-
-Pour des raisons de sécurité, on crée un utilisateur système dédié :
+Créer l’utilisateur dédié :
 
 ```bash
 sudo adduser --system --group --no-create-home --disabled-login asterisk
 sudo chown -R asterisk:asterisk /etc/asterisk /var/{lib,log,run,spool}/asterisk
 sudo chmod -R 750 /etc/asterisk
-```
-
-Modifiez ensuite `/etc/asterisk/asterisk.conf` :
-
-- Recherchez les lignes :
-  ```
-  runuser = asterisk
-  rungroup = asterisk
-  ```
-- Retirez les éventuels `;` pour décommenter.
-
-Redémarrez Asterisk :
-
-```bash
+sudo sed -i 's/;\?\(runuser *=\).*/\1 asterisk/'  /etc/asterisk/asterisk.conf
+sudo sed -i 's/;\?\(rungroup *=\).*/\1 asterisk/' /etc/asterisk/asterisk.conf
 sudo systemctl restart asterisk
 ```
 
-Pour vérifier que le service tourne avec l’utilisateur *asterisk* :
+### 2.2 Services d’autoprovisioning
 
-```bash
-ps aux | grep asterisk
+| Service | Paquet | Rôle | Interface/VLAN |
+|---------|--------|------|----------------|
+| **DHCP** | isc-dhcp-server | Attribue IP + option 66 → TFTP | VLAN 125 (Voix) |
+| **TFTP** | tftpd‑hpa | Diffuse firmware Cisco & XML | VLAN 125 |
+
+**DHCP – extrait /etc/dhcp/dhcpd.conf :**
+```dhcp
+subnet 192.168.125.0 netmask 255.255.255.0 {
+  range 192.168.125.20 192.168.125.99;
+  option routers 192.168.125.1;           # SVI ToIP (Asterisk)
+  option tftp-server-name "192.168.125.130";  # VM TFTP
+  option bootfile-name   "XMLDefault.cnf.xml";
+}
 ```
 
----
+**TFTP :** placez le firmware (`SIP42.xx.loads`) et les fichiers `XMLDefault.cnf.xml`, `dialplan.xml`, `SEP<MAC>.cnf.xml` dans `/srv/tftp/`.
 
-## 2. Mise en place d’un serveur TFTP et DHCP
+### 2.3 Configuration des téléphones Cisco
 
-1. **Configurer un pool DHCP** dédié aux téléphones, et ajouter l’option 66 pointant vers votre serveur TFTP.
-2. **Installer et configurer un serveur TFTP** (ex. `tftpd-hpa`) et placez-y les firmwares des téléphones Cisco.
-3. Dans le répertoire `/srv/tftp/` (ou le répertoire choisi pour TFTP), décompressez le firmware du téléphone.
-4. Lorsque le téléphone redémarre et reçoit une IP via DHCP, il ira chercher automatiquement son firmware.
-
----
-
-## 3. Configuration SIP pour les Téléphones Cisco
-
-Après réinitialisation d’usine, la configuration SIP des téléphones Cisco se fait via **trois fichiers XML** placés à la racine de votre serveur TFTP :
-
-1. **XMLDefault.cnf.xml**
-2. **dialplan.xml** (ou plusieurs fichiers dialplan, un par téléphone si nécessaire)
-3. **SEP****.cnf.xml**
-
-> **Remarque :** De nombreux tutoriels en ligne mentionnent des fichiers `.cnf` à la place de `.cnf.xml`. Dans la pratique, après réinitialisation, ce sont bien les `.cnf.xml` qui fonctionnent.
-
-### 3.1 Fichier `XMLDefault.cnf.xml`
-
+#### 2.3.1 `XMLDefault.cnf.xml`
 ```xml
 <Default>
    <callManagerGroup>
@@ -148,36 +97,17 @@ Après réinitialisation d’usine, la configuration SIP des téléphones Cisco 
      </members>
    </callManagerGroup>
    <loadInformation434 model="Cisco 7942">!!!VERSION!!!</loadInformation434>
-   <authenticationURL></authenticationURL>
-   <directoryURL></directoryURL>
-   <idleURL></idleURL>
-   <informationURL></informationURL>
-   <messagesURL></messagesURL>
-   <servicesURL></servicesURL>
 </Default>
 ```
 
-- **Ligne 13** : Remplacez `!!!ASTERISK!!!` par l’IP ou le FQDN de votre serveur Asterisk.
-- **Ligne 18** : Remplacez `!!!VERSION!!!` par la version de votre firmware (par exemple : `SIP42.9-4-2SR3-1S`). Vous pouvez la repérer via :
-  ```bash
-  ls SIP*.loads | sed 's/\\.loads//'
-  ```
-
-### 3.2 Fichier `dialplan.xml`
-
+#### 2.3.2 `dialplan.xml`
 ```xml
 <DIALTEMPLATE>
   <TEMPLATE MATCH="...." Timeout="0"/>
 </DIALTEMPLATE>
 ```
 
-- Le champ `MATCH="...."` représente ici un masque de numérotation sur 4 chiffres.
-- Vous pouvez créer plusieurs dialplans (ex. `dialplan1.xml`, `dialplan2.xml`) si chaque téléphone requiert un plan de numérotation différent.
-
-### 3.3 Fichier `SEP<MAC>.cnf.xml`
-
-Ce fichier est crucial pour la configuration SIP et doit inclure l’adresse MAC du téléphone dans son nom, par exemple `SEP001122334455.cnf.xml`.
-
+#### 2.3.3 `SEP<MAC>.cnf.xml`
 ```xml
 <device>
   <deviceProtocol>SIP</deviceProtocol>
@@ -359,113 +289,68 @@ Ce fichier est crucial pour la configuration SIP et doit inclure l’adresse MAC
 </device>
 ```
 
-Dans ce fichier, remplacez :
+### 2.4 Fichiers Asterisk
 
-- `!!!NTP!!!` : l’IP ou FQDN de votre **Serveur NTP**.
-- `!!!ASTERISK!!!` : l’IP ou FQDN de votre **Serveur Asterisk**.
-- `!!!NOM!!!` : le nom convivial de votre téléphone.
-- `!!!UTILISATEUR!!!` : l’utilisateur SIP configuré sur Asterisk.
-- `!!!MOTDEPASSE!!!` : le mot de passe SIP correspondant.
-- `!!!VERSION!!!` : la version du firmware (exemple : `SIP42.9-4-2SR3-1S`).
-
-> **Important** : Vous devez créer un fichier `dialplan.xml` pour chaque téléphone si leur plan de numérotation diffère et ajuster la balise `<dialTemplate>` en conséquence.
-
----
-
-## 4. Configuration d’Asterisk
-
-### 4.1 Fichier `sip.conf`
-
-Exemple de configuration pour deux postes SIP :
-
+`/etc/asterisk/sip.conf` – extraits :
 ```ini
-[7001] ; Section pour l’extension SIP 7001
-type=friend ; "friend" permet à la fois l’enregistrement entrant et sortant
-username=7001 ; Nom d’utilisateur SIP
-secret=123 ; Mot de passe d’authentification SIP
-callerid=7001 <7001> ; Identification de l’appelant
-context=internal ; Contexte dialplan dans lequel l’appel sera traité
-nat=no ; Indique que le téléphone n’est pas derrière NAT
-canreinvite=no ; Empêche la re-négociation directe du média entre pairs (Asterisk reste au centre)
-host=dynamic ; Le téléphone enregistrera son IP dynamiquement
-qualify=yes ; Active le suivi de présence (PING SIP)
+[general]
+context=default
+bindport=5060
+bindaddr=0.0.0.0
+language=fr
+videosupport=no
 
-[7002] ; Section pour l’extension SIP 7002
-type=friend ; "friend" permet les enregistrements et appels entrants/sortants
-username=7002 ; Nom d’utilisateur SIP
-secret=456 ; Mot de passe d’authentification SIP
-callerid=7002 <7002> ; Identification de l’appelant
-context=internal ; Contexte dialplan dans lequel l’appel sera traité
-nat=no ; Indique qu’il n’y a pas de NAT
-canreinvite=no ; Empêche la re-négociation directe du média
-host=dynamic ; Enregistrement nécessaire pour connaître son IP
-qualify=yes ; Vérifie la qualité du lien avec des paquets SIP
+[7001](!)
+type=friend
+host=dynamic
+secret=123
+context=internal
+callerid="Poste 7001" <7001>
+qualify=yes
+
+[7002](7001)   ; hérite de la section générique
+secret=456
+callerid="Poste 7002" <7002>
 ```
 
-### 4.2 Fichier `extensions.conf`
-
-Dans le contexte `[internal]`, configurez vos postes :
-
+`/etc/asterisk/extensions.conf` – extrait :
 ```ini
-[internal] ; Contexte principal pour les extensions internes
-exten => 7001,1,Answer()            ; Répond à l’appel immédiatement
-exten => 7001,2,Dial(SIP/7001,20)   ; Compose l’extension SIP/7001 pendant 20 secondes
-exten => 7001,3,Playback(vm-nobodyavail) ; Joue un message indiquant que personne n’est disponible
-exten => 7001,4,VoiceMail(7001@main); Redirige vers la messagerie vocale associée à l’extension 7001
-exten => 7001,5,Hangup()            ; Raccroche l’appel
-
-exten => 7002,1,Answer()            ; Répond à l’appel immédiatement
-exten => 7002,2,Dial(SIP/7002,20)   ; Compose l’extension SIP/7002 pendant 20 secondes
-exten => 7002,3,Playback(vm-nobodyavail) ; Joue un message indiquant que personne n’est disponible
-exten => 7002,4,VoiceMail(7002@main); Redirige vers la messagerie vocale associée à l’extension 7002
-exten => 7002,5,Hangup()            ; Raccroche l’appel
+[internal]
+exten => _7XXX,1,NoOp(Appel interne vers ${EXTEN})
+ same => n,Dial(SIP/${EXTEN},20)
+ same => n,VoiceMail(${EXTEN}@main,u)
+ same => n,Hangup()
 ```
 
-### 4.3 Fichier `voicemail.conf`
-
-Activez la boîte vocale pour chaque extension :
-
+`/etc/asterisk/voicemail.conf` :
 ```ini
 [main]
-7001 => 123
-7002 => 456
+7001 => 123,Poste 7001,,
+7002 => 456,Poste 7002,,
 ```
+
+Appliquer :
+```bash
+sudo asterisk -rx "module load chan_sip.so"
+sudo asterisk -rx "core reload"
+```
+
+### 2.5 Tests et supervision
+
+- **Enregistrement :** `asterisk -rx "sip show peers"` → `7001` et `7002` doivent être *OK* (Latency < 100 ms).
+- **Appels internes :** décrocher `7001` → composer `7002` → vérifier audio dans les deux sens.
+- **QoS** : Sur le switch, tag VLAN 125 et configurer `trust dscp`; vérifier avec `show mls qos interface ...`.
 
 ---
 
-## 5. Vérification du Service
+## 3. Conclusion
 
-1. Retournez dans la console Asterisk :
+La solution déployée fournit :
 
-```bash
-sudo asterisk -rvvv
-```
+- Un **IPBX Asterisk 18** sécurisé, tournant sous utilisateur dédié `asterisk` ;
+- Un **provisioning automatique** des téléphones Cisco via DHCP option 66 et TFTP (firmware + XML) ;
+- Des **extensions internes** (7001, 7002…) disposant de la messagerie vocale ;
+- Un **VLAN voix** isolé (125) garantissant bande passante et latence ;
+- Une **mobilité** assurée par l’application Zoiper sur SSID ToIP.
 
-2. Assurez-vous que le module SIP est chargé :
-
-```bash
-module load chan_sip.so
-```
-
-3. Rechargez la configuration :
-
-```bash
-core reload
-```
-
-4. Vérifiez la présence de vos téléphones :
-
-```bash
-sip show peers
-```
-
-Si tout est correct, vous devriez voir vos téléphones **7001** et **7002** apparaître comme *Registered*. Vous pouvez maintenant passer des appels internes et profiter des fonctionnalités de la messagerie vocale.
-
----
-
-## Conclusion
-
-Vous avez désormais un **serveur Asterisk 18.x** opérationnel, avec des téléphones Cisco configurés via TFTP/DHCP et les bons fichiers XML. Vous pouvez adapter cette configuration en fonction de vos besoins (ajout d’extensions, mise en place de plans de numérotation avancés, etc.).
-
-**Bon déploiement !**
-
+Ce dispositif répond aux exigences de l’évaluation BTS SIO (E6) et peut être étendu (SIP Trunk, IVR, QoS DSCP) pour accompagner la croissance de Sportludique.
