@@ -73,6 +73,7 @@ nav:
           - Mise en place du HTTPS sécurisé sur Proxmox: Hypervision/Proxmox/httpsprx.md
   - 📞 Téléphonie:
       -  Téléphonie Asterisk: Telephonie/Telephonie.md
+      -  Trunk SIP: Telephonie/TrunkSIP.md
   - 🔗 VPN:
       - VPN SSL: VPN/SSL.md
       - VPN IPSec: VPN/IPSec.md
