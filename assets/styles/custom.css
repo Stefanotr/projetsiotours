@@ -1,0 +1,233 @@
+/*
+  Sportludique – "Green Wave Pro" MkDocs theme  (v1.3)
+  -----------------------------------------------------------
+  • Professional Green Color Palette
+  • Elegant Glassmorphism
+  • Refined Green-Focused Design
+  • Place under docs/overrides/stylesheets/green_wave_pro.css
+  -----------------------------------------------------------
+*/
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fira+Code:wght@400;500&display=swap");
+
+/* ========== 1. Tokens ========= */
+@media (prefers-color-scheme: light) {
+  :root {
+    /* Professional Green Base */
+    --nw-bg: #f0f4f8;
+    --nw-surface: rgba(255,255,255,0.75);
+    --nw-surface-dark: rgba(240,248,240,0.85);
+    --nw-border: rgba(0,0,0,0.06);
+    
+    /* Text Colors */
+    --nw-text: #1f2d3d;
+    --nw-muted: #47665e;
+    
+    /* Intense Green Palette */
+    --nw-primary-deep: #0d9488;    /* Teal Green*/
+    --nw-primary: #10b981;         /* Intense Emerald */
+    --nw-primary-light: #34d399;   /* Bright Mint */
+    --nw-accent-dark: #065f46;     /* Deep Forest Green */
+    --nw-accent: #047857;          /* Rich Green */
+    
+    /* Gradient & Effects */
+    --nw-gradient: linear-gradient(135deg, var(--nw-primary-deep), var(--nw-primary), var(--nw-accent));
+    
+    /* Code Styling */
+    --nw-code-bg: rgba(16,94,74,0.05);
+    --nw-code-text: #1f2d3d;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark Mode Green Base */
+    --nw-bg: #061612;
+    --nw-surface: rgba(6,22,18,0.7);
+    --nw-surface-dark: rgba(6,22,18,0.85);
+    --nw-border: rgba(255,255,255,0.1);
+    
+    /* Text Colors */
+    --nw-text: #e6f4f1;
+    --nw-muted: #7bc4b2;
+    
+    /* Intense Green Palette */
+    --nw-primary-deep: #0f766e;    /* Dark Teal */
+    --nw-primary: #059669;         /* Forest Emerald */
+    --nw-primary-light: #10b981;   /* Bright Emerald */
+    --nw-accent-dark: #014743;     /* Very Deep Green */
+    --nw-accent: #166534;          /* Deep Verdant */
+    
+    /* Gradient & Effects */
+    --nw-gradient: linear-gradient(135deg, var(--nw-primary-deep), var(--nw-primary), var(--nw-accent));
+    
+    /* Code Styling */
+    --nw-code-bg: rgba(5,150,105,0.1);
+    --nw-code-text: #e6f4f1;
+  }
+}
+
+/* ========== 2. Base styles ========= */
+html{scroll-behavior:smooth;}
+body{
+  font-family:"Inter",sans-serif;
+  background:var(--nw-bg);
+  color:var(--nw-text);
+  transition:background .4s ease,color .4s ease;
+  line-height:1.75;
+}
+
+.md-main__inner{background:transparent;}
+.md-content__inner{
+  background:var(--nw-surface);
+  backdrop-filter:blur(24px) saturate(120%);
+  border:1px solid var(--nw-border);
+  border-radius:16px;
+  padding:2.4rem 2rem;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  animation:fadeSlide .6s both;
+}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* ========== 3. Headings ========= */
+h1,h2,h3,h4,h5{font-weight:600;margin-top:1.8em;margin-bottom:.7em;position:relative;}
+
+h1{
+  font-size:2.5rem;
+  background:var(--nw-gradient);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+h2{font-size:1.9rem;color:var(--nw-primary);} 
+h3{font-size:1.45rem;color:var(--nw-accent);} 
+
+/* Subtle gradient underline for headings */
+h1::after,h2::after{
+  content:"";position:absolute;left:0;bottom:-8px;width:120px;height:3px;border-radius:2px;
+  background:var(--nw-gradient);
+  background-size:300% 100%;
+  animation:moveHue 5s linear infinite;
+  opacity:0.7;
+}
+@keyframes moveHue{0%{background-position:0 0;}100%{background-position:300% 0;}}
+
+/* ========== 4. Sidebar hover effects ========= */
+.md-sidebar .md-nav__link,
+.md-header__topic {
+  color:var(--nw-accent); /* Soft off-white */
+  position:relative;
+  overflow:hidden;
+  transition:color .3s ease;
+}
+
+.md-sidebar .md-nav__link::before{
+  content:"";
+  position:absolute;
+  left:-100%;
+  top:0;
+  width:100%;
+  height:100%;
+  background:var(--nw-gradient);
+  opacity:.15;
+  transition:transform .35s ease;
+}
+.md-sidebar .md-nav__link:hover{color:var(--nw-text);} 
+.md-sidebar .md-nav__link:hover::before{transform:translateX(100%);} 
+
+/* ========== 5. Links ========= */
+a{
+  color:var(--nw-surface);
+  text-decoration:none;
+  position:relative;
+  transition:color .2s ease;
+}
+a::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:-3px;
+  width:0;
+  height:2px;
+  background:var(--nw-accent-dark);
+  transition:width .25s ease;
+}
+a:hover{color:var(--nw-accent-dark);}
+a:hover::after{width:100%;}
+
+/* ========== 6. Code ========= */
+code,pre{font-family:"Fira Code",monospace;}
+code{
+  background:rgba(5,150,105,0.15);
+  padding:.15em .45em;
+  border-radius:4px;
+  font-size:.9em;
+  color:var(--nw-text);
+}
+pre{
+  background:var(--nw-code-bg);
+  color:var(--nw-code-text);
+  padding:1.4rem 1.6rem;
+  border-radius:12px;
+  border:1px solid var(--nw-border);
+  position:relative;
+  overflow:auto;
+  font-size:.92rem;
+  box-shadow:0 4px 15px rgba(0,0,0,0.05);
+}
+pre::before{
+  content:"<code/>";
+  position:absolute;
+  top:8px;
+  right:16px;
+  font-size:.7rem;
+  color:var(--nw-primary-light);
+  opacity:.65;
+}
+pre:hover{
+  transform:translateY(-4px);
+  box-shadow:0 6px 20px rgba(0,0,0,0.08);
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+
+/* ========== 7. Tables ========= */
+.md-typeset table{
+  width:100%;
+  border-collapse:collapse;
+  margin:1.6rem 0;
+  font-size:.96rem;
+  backdrop-filter:blur(10px) saturate(100%);
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 4px 15px rgba(0,0,0,0.05);
+}
+.md-typeset th,.md-typeset td{
+  padding:.8em .9em;
+  border:1px solid var(--nw-border);
+} 
+.md-typeset th{
+  background:var(--nw-primary);
+  color:#fff;
+  font-weight:600;
+}
+.md-typeset tr:nth-child(even){
+  background:var(--nw-surface-dark);
+} 
+
+/* ========== 8. Admonitions ========= */
+.md-typeset .admonition{
+  border-left:6px solid var(--nw-accent);
+  background:var(--nw-surface-dark);
+  border-radius:12px;
+  padding:1rem 1.3rem;
+}
+
+/* ========== 9. Scrollbar ========= */
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--nw-primary);border-radius:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ========== 10. Img reveal ========= */
+img,iframe{opacity:0;animation:reveal .7s forwards;}
+@keyframes reveal{to{opacity:1;}}
+
