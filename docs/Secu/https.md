@@ -1,49 +1,39 @@
-# Activer HTTPS avec une Autorité de Certification Personnalisée sur tours.sportludique.fr
+# Activer HTTPS avec une Autorité de Certification personnalisée sur `tours.sportludique.fr`
 
-Ce guide explique comment générer et installer un certificat SSL auto-signé pour le domaine `tours.sportludique.fr`.
+Ce guide explique comment générer un certificat SSL signé par une autorité interne, l’installer et le configurer pour le site `tours.sportludique.fr`.
 
-## 🌐 Étape 1 : Créer votre propre Autorité de Certification (CA)
-
-1. **Créer un dossier pour l’AC :**
-
-   ```bash
-   mkdir -p ~/myCA
-   cd ~/myCA
-   ```
-
-2. **Générer la clé privée de l'AC :**
-
-   ```bash
-   openssl genrsa -out myCA.key 2048
-   ```
-
-3. **Créer un certificat pour l'AC :**
-
-   ```bash
-   openssl req -x509 -new -nodes -key myCA.key -sha256 -days 3650 -out myCA.pem
-   ```
-
-   Lors de cette étape, répondez aux questions demandées par OpenSSL. Pour le champ **Common Name (CN)**, utilisez `"tours.sportludique.fr CA"` pour identifier l'AC.
+Ce certificat est utilisé dans le cadre du **site web vitrine de SportLudique**, hébergé localement et exposé publiquement via un **reverse proxy HAProxy**, dont la configuration est abordée dans la section [Haute-disponibilité](../ha/haproxy/intro.md).
 
 ---
 
-## 🔐 Étape 2 : Créer le certificat SSL pour `tours.sportludique.fr`
+## Étape 1 – Récupération du certificat d’autorité
 
-1. **Générer la clé privée pour le site :**
+Avant toute configuration, il est nécessaire que le client (navigateur) **fasse confiance à l’autorité interne STS Root R2**.
+
+Téléchargez le certificat racine depuis :
+[https://trustus.mana.lan/ca.crt](https://trustus.mana.lan/ca.crt)
+
+Puis, installez ce fichier dans le magasin de certificats de confiance de votre navigateur ou de votre OS.
+
+---
+
+## Étape 2 – Génération du certificat SSL pour `tours.sportludique.fr`
+
+1. **Créer une clé privée pour le site :**
 
    ```bash
    openssl genrsa -out tours.sportludique.fr.key 2048
    ```
 
-2. **Créer un fichier de configuration OpenSSL pour le certificat SSL :** Créez un fichier nommé `tours.sportludique.fr.conf` avec le contenu suivant :
+2. **Créer un fichier de configuration OpenSSL (ex : `tours.sportludique.fr.conf`)** :
 
-   ```conf
+   ```ini
    [req]
-   default_bits = 2048
-   prompt = no
-   default_md = sha256
+   default_bits       = 2048
+   prompt             = no
+   default_md         = sha256
    distinguished_name = dn
-   req_extensions = req_ext
+   req_extensions     = req_ext
 
    [dn]
    CN = tours.sportludique.fr
@@ -55,30 +45,43 @@ Ce guide explique comment générer et installer un certificat SSL auto-signé p
    DNS.1 = tours.sportludique.fr
    ```
 
-3. **Générer une CSR (Certificate Signing Request) :**
+3. **Générer la CSR :**
 
    ```bash
-   openssl req -new -key tours.sportludique.fr.key -out tours.sportludique.fr.csr -config tours.sportludique.fr.conf
+   openssl req -new -key tours.sportludique.fr.key \
+     -out tours.sportludique.fr.csr \
+     -config tours.sportludique.fr.conf
    ```
 
-4. **Signer le certificat avec votre CA :**
+4. **Signer la CSR avec la CA STS Root R2 :**
+
+   (Depuis la machine qui héberge la CA)
 
    ```bash
-   openssl x509 -req -in tours.sportludique.fr.csr -CA myCA.pem -CAkey myCA.key -CAcreateserial -out tours.sportludique.fr.crt -days 365 -sha256 -extfile tours.sportludique.fr.conf -extensions req_ext
+   openssl x509 -req \
+     -in tours.sportludique.fr.csr \
+     -CA /etc/ssl/STS-Root-R2/certs/ca.crt \
+     -CAkey /etc/ssl/STS-Root-R2/private/ca.key \
+     -CAcreateserial \
+     -out tours.sportludique.fr.crt \
+     -days 365 \
+     -sha256 \
+     -extfile tours.sportludique.fr.conf \
+     -extensions req_ext
    ```
 
 ---
 
-## 🖥️ Étape 3 : Configurer Apache pour utiliser HTTPS
+## Étape 3 – Déploiement avec Apache (en local)
 
-1. **Déplacer les fichiers vers un dossier accessible pour Apache :**
+1. **Déplacer les fichiers dans les emplacements standards :**
 
    ```bash
    sudo cp tours.sportludique.fr.crt /etc/ssl/certs/
    sudo cp tours.sportludique.fr.key /etc/ssl/private/
    ```
 
-2. **Configurer le VirtualHost pour HTTPS :** Ouvrez (ou créez) le fichier de configuration d’Apache pour `tours.sportludique.fr` dans `/etc/apache2/sites-available/` et ajoutez les lignes suivantes :
+2. **Créer un fichier Apache dans `/etc/apache2/sites-available/tours.sportludique.fr.conf` :**
 
    ```apache
    <VirtualHost *:443>
@@ -88,7 +91,7 @@ Ce guide explique comment générer et installer un certificat SSL auto-signé p
        SSLEngine on
        SSLCertificateFile /etc/ssl/certs/tours.sportludique.fr.crt
        SSLCertificateKeyFile /etc/ssl/private/tours.sportludique.fr.key
-       
+
        <Directory /var/www/html/sportludique_parodie>
            AllowOverride All
            Require all granted
@@ -106,6 +109,24 @@ Ce guide explique comment générer et installer un certificat SSL auto-signé p
 
 ---
 
-## 🌐 Étape 4 : Importer le certificat CA dans votre navigateur
+## Étape 4 – Intégration avec le reverse proxy HAProxy
 
-Pour que votre navigateur reconnaisse le certificat auto-signé sans avertissement de sécurité, ajoutez `myCA.pem` à vos certificats de confiance dans les paramètres de votre navigateur.
+Dans l’environnement final, **le site `tours.sportludique.fr` est servi via HAProxy**, qui se charge de la terminaison TLS et de la redirection vers l’Apache local.
+
+La configuration de HAProxy est décrite dans la page suivante :
+➡️ [Voir la configuration HAProxy](../ha/haproxy/intro.md)
+
+Le certificat `.crt` peut être concaténé avec sa clé `.key` pour HAProxy si besoin :
+
+```bash
+cat /etc/ssl/certs/tours.sportludique.fr.crt /etc/ssl/private/tours.sportludique.fr.key > /etc/ssl/haproxy/tours.bundle.pem
+```
+
+---
+
+## Étape 5 – Import manuel du certificat pour tests
+
+Pour tester l'accès HTTPS depuis un navigateur **en interne** sans erreur de sécurité :
+
+1. Ouvrir `https://tours.sportludique.fr` depuis le réseau local.
+2. Si votre navigateur affiche une alerte, installer manuellement le certificat `ca.crt` depuis `https://trustus.mana.lan/`.

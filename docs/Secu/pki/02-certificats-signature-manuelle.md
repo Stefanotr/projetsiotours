@@ -1,14 +1,17 @@
-# Signature manuelle de certificats (FQDN & Wildcard)
+# Signature manuelle de certificats (FQDN et Wildcard)
 
-Dans cette étape, nous verrons comment générer un certificat TLS pour un site web ou service interne. Cette procédure est destinée aux cas où un certificat spécifique est nécessaire (nom de domaine unique ou wildcard).
+Dans cette étape, nous verrons comment générer un certificat TLS pour un site web ou un service interne. Cette procédure est destinée aux cas où un certificat spécifique est nécessaire (nom de domaine unique ou wildcard).
 
-## 📌 Recommandations
+## Recommandations
 
-- Ne jamais manipuler directement les fichiers dans `/etc/ssl/STS-Root-R2` (répertoire de la CA).
-- Les certificats utilisateurs (clé privée, CSR, certificat signé) doivent être générés dans le dossier personnel, par exemple `/home/toursadmin/STS-Root-R2/Client/`.
-- Le CN (Common Name) seul ne suffit plus. Depuis la [RFC 2818](https://datatracker.ietf.org/doc/html/rfc2818), le champ `subjectAltName` est **obligatoire**.
+* Ne jamais manipuler directement les fichiers dans `/etc/ssl/STS-Root-R2` (répertoire de la CA).
+* Les certificats utilisateurs (clé privée, CSR, certificat signé) doivent être générés dans un dossier personnel, par exemple :
+  `/home/toursadmin/STS-Root-R2/Client/`.
+* Le CN (Common Name) seul ne suffit plus. Depuis la [RFC 2818](https://datatracker.ietf.org/doc/html/rfc2818), le champ `subjectAltName` est obligatoire.
 
-## 🔧 Exemple de génération pour un certificat FQDN
+---
+
+## Exemple de génération pour un certificat FQDN
 
 ```bash
 mkdir -p ~/STS-Root-R2/Client/monserveur.mana.lan
@@ -27,9 +30,11 @@ subjectAltName = DNS:monserveur.mana.lan
 keyUsage = digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
 EOF
-````
+```
 
-## 🖊️ Signature du certificat par la CA
+---
+
+## Signature du certificat par la CA
 
 ```bash
 sudo openssl ca -in request.csr -out cert.crt \
@@ -38,11 +43,11 @@ sudo openssl ca -in request.csr -out cert.crt \
   -extfile extfile.cnf
 ```
 
-⚠️ Le fichier `index.txt` dans la CA enregistre automatiquement le certificat signé et son numéro de série.
+Le fichier `index.txt` dans la CA enregistre automatiquement le certificat signé et son numéro de série.
 
 ---
 
-## 🌐 Exemple pour un certificat Wildcard
+## Exemple pour un certificat Wildcard
 
 ```bash
 # CN = *.domaine.lan
@@ -56,7 +61,9 @@ extendedKeyUsage = serverAuth
 EOF
 ```
 
-## 📁 Organisation recommandée
+---
+
+## Organisation recommandée
 
 ```
 ~/STS-Root-R2/Client/
@@ -71,4 +78,4 @@ EOF
 
 ---
 
-✅ La CRL et OCSP **ne sont pas encore intégrés à cette étape**, ils seront abordés dans les parties suivantes.
+> Remarque : la CRL et OCSP ne sont pas encore intégrés à cette étape. Ils sont abordés dans les parties suivantes.

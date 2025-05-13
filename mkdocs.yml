@@ -55,10 +55,15 @@ nav:
       -  Routeur Fibre: Configuration-de-base/gatewayfi.md
       -  Routeur ADSL: Configuration-de-base/gatewayad.md
   - ⚡ Réseaux avancés et haute disponibilité:
-      -  HSRP: Haute-disponibilité/hsrp.md
-      -  IP SLA: Haute-disponibilité/rulesipsla.md
-      -  Interface LACP sur Cisco: Haute-disponibilité/lacp.md
-      -  Configuration CARP: Haute-disponibilité/carp.md
+      -  HSRP: ha/hsrp.md
+      -  IP SLA: ha/rulesipsla.md
+      -  Interface LACP sur Cisco: ha/lacp.md
+      -  Configuration CARP: ha/carp.md
+      -  Haproxy:
+          - Introduction: ha/haproxy/intro.md
+          - Configuration – HAProxy sur Debian: ha/haproxy/01-https-loadbalancer.md
+          - Configuration de la haute disponibilité avec Keepalived (VRRP): ha/haproxy/02-vrrp-keepalived.md
+          - Finalisation et amélioration de la configuration HAProxy: ha/haproxy/03-haproxy-finalisation.md
   - 🔒 Cybersécurité:
       - Web:
           -  HTTPS: Secu/https.md
@@ -69,7 +74,7 @@ nav:
           - Automatisation de la génération et signature de certificats: Secu/pki/03-automatisation-signature.md
           - Publication de la CRL et mise en place d'un serveur OCSP: Secu/pki/04-crl-et-ocsp.md
           - Finalisation de la PKI, exploitation et distribution: Secu/pki/05-finalisation-pki.md
-  - 🖥️ Supervision:
+  - 🖥️ Virtualisation:
       -  Docker:
           - Gestion des conteneurs avec Docker: Hypervision/dockernode.md
       -  Proxmox:
@@ -84,4 +89,3 @@ nav:
   - 🔗 VPN:
       - VPN SSL: VPN/SSL.md
       - VPN IPSec: VPN/IPSec.md
-
