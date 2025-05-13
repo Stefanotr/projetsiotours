@@ -59,17 +59,24 @@ nav:
       -  IP SLA: Haute-disponibilité/rulesipsla.md
       -  Interface LACP sur Cisco: Haute-disponibilité/lacp.md
       -  Configuration CARP: Haute-disponibilité/carp.md
-      -  Installation et Configuration d'HAProxy: Haute-disponibilité/haproxy.md
   - 🔒 Cybersécurité:
-      -  HTTPS: Secu/https.md
-  - 🖥️ Hypervision:
+      - Web:
+          -  HTTPS: Secu/https.md
+      -  PKI:
+          - Introduction: Secu/pki/intro.md
+          - Création de l’autorité de certification STS Root R2: Secu/pki/01-creation-ca.md
+          - Signature manuelle de certificats (FQDN & Wildcard): Secu/pki/02-certificats-signature-manuelle.md
+          - Automatisation de la génération et signature de certificats: Secu/pki/03-automatisation-signature.md
+          - Publication de la CRL et mise en place d'un serveur OCSP: Secu/pki/04-crl-et-ocsp.md
+          - Finalisation de la PKI, exploitation et distribution: Secu/pki/05-finalisation-pki.md
+  - 🖥️ Supervision:
       -  Docker:
           - Gestion des conteneurs avec Docker: Hypervision/dockernode.md
       -  Proxmox:
           - Introduction: Hypervision/Proxmox/intro.md
-          - Installation de Proxmox sur Debian 12: Hypervision/proxmox.md
-          - Gestion du stockage ISO: Hypervision/storagepxiso.md
-          - Création d'un pool ZFS dans Proxmox: Hypervision/zfsproxmox.md
+          - Installation de Proxmox sur Debian 12: Hypervision/Proxmox/proxmox.md
+          - Gestion du stockage ISO: Hypervision/Proxmox/storagepxiso.md
+          - Création d'un pool ZFS dans Proxmox: Hypervision/Proxmox/zfsproxmox.md
           - Mise en place du HTTPS sécurisé sur Proxmox: Hypervision/Proxmox/httpsprx.md
   - 📞 Téléphonie:
       -  Téléphonie Asterisk: Telephonie/Telephonie.md

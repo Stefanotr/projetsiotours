@@ -24,4 +24,4 @@ La Direction des Systèmes d'Information (DSI) vise plusieurs objectifs :
 - Améliorer l'infrastructure
 - Renforcer la sécurité
 
-![toursnetwork](Images/Tours.png)
+![toursnetwork](assets/images/Tours.png)

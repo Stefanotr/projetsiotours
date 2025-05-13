@@ -76,7 +76,7 @@ Accéder à l'interface web depuis un poste client :
 
 Si tout est bien configuré, le **certificat est reconnu comme valide** dans le navigateur.
 
-![Connexion HTTPS valide](../../Images/Sslprx.png)
+![Connexion HTTPS valide](../../assets/images/Sslprx.png)
 
 ---
 

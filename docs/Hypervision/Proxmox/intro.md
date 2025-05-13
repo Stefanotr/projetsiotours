@@ -28,7 +28,7 @@ Cette infrastructure repose sur **Proxmox VE**, un hyperviseur libre et robuste,
 
 Le serveur physique dédié à l’hyperviseur Proxmox dispose d’un disque de **600 Go** organisé comme suit :
 
-![Partitionnement disque](../../Images/Lvmprx.png)
+![Partitionnement disque](../../assets/images/Lvmprx.png)
 
 - `/dev/sda1` (1 Go) : contient la partition de démarrage (`/boot`).
 - `/dev/sda2` (50 Go) : regroupe les volumes logiques critiques du système :
@@ -48,7 +48,7 @@ Le serveur physique dédié à l’hyperviseur Proxmox dispose d’un disque de 
 
 Le serveur est équipé de **deux cartes réseau physiques** (multi-ports), configurées pour séparer les usages (gestion, services, agrégation LACP) :
 
-![Interfaces réseau](../../Images/Network-proxmox.png)
+![Interfaces réseau](../../assets/images/Network-proxmox.png)
 
 - **Carte 1 (4 ports) :**
   - `eno1` : agrégation LACP (VLAN 220-229) – [active]
